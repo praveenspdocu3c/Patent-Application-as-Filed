@@ -1,0 +1,17 @@
+PyMuPDF
+openai
+python-dotenv
+pandas
+streamlit
+python-docx
+azure-ai-formrecognizer
+azure-core
+docx2pdf
+regex
+jsonschema
+pypandoc==1.14  
+PyPDF2
+nltk
+azure-storage-blob 
+pypdf
+tiktoken
