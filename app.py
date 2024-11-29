@@ -29,19 +29,18 @@ from azure.storage.blob import BlobServiceClient  # type: ignore
 import tiktoken  
   
 # Define your connection string and container name  
-    
 connection_string = "DefaultEndpointsProtocol=https;AccountName=patent;AccountKey=F8W2RDEJMD5kJ3elvulDyz6XJlYBWp4K3WY4IHhTHKfW+tG/HKTVKmzZS5y0J6GgWFp1uBKImwvs+ASthawnOA==;EndpointSuffix=core.windows.net"  
 container_name = "patent"  
-
+  
 # Initialize the BlobServiceClient  
 blob_service_client = BlobServiceClient.from_connection_string(connection_string)  
-
+  
 # Create the container if it doesn't exist  
 container_client = blob_service_client.get_container_client(container_name)  
 try:  
     container_client.create_container()  
 except Exception as e:  
-    print(f"Container already exists or could not be created: {e}")  
+    logging.error(f"Container already exists or could not be created: {e}") 
 
 def upload_file_to_blob(file_path, blob_name, folder_name=None):  
     try:  
@@ -59,9 +58,9 @@ def upload_file_to_blob(file_path, blob_name, folder_name=None):
         with open(file_path, "rb") as data:  
             blob_client.upload_blob(data, overwrite=True)  
   
-        print(f"File {file_path} uploaded to blob {full_blob_name}.")  
+        logging.info(f"File {file_path} uploaded to blob {full_blob_name}.")  
     except Exception as e:  
-        print(f"Error uploading file to blob: {e}")  
+        logging.error(f"Error uploading file to blob: {e}")  
 
 # Configure logging  
 logging.basicConfig(  
@@ -216,7 +215,7 @@ def summarize_text(processed_text):
     try:  
         # Calculate and display tokens used for summarization  
         tokens_used = calculate_tokens(messages)  
-        print(f"Tokens used for summarization: {tokens_used}")  
+        logging.info(f"Tokens used for summarization: {tokens_used}")  
   
         # Call OpenAI API for summarization  
         response = client.chat.completions.create(  
@@ -228,7 +227,7 @@ def summarize_text(processed_text):
         return summarized_content  
   
     except Exception as e:  
-        print(f"Error during text summarization: {str(e)}")  
+        logging.warning(f"Error during text summarization: {str(e)}")  
         return processed_text  # Return original text if summarization fails  
   
 def extract_text_from_docx(docx_path):  
@@ -267,7 +266,7 @@ def determine_domain_expertise(action_document_text):
     ] 
     # Calculate and display tokens used  
     tokens_used = calculate_tokens(messages)  
-    print(f"Tokens used in this API call: {tokens_used}") 
+    logging.info(f"Tokens used in this API call: {tokens_used}") 
   
     try:  
         # Call OpenAI API for domain expertise determination  
@@ -279,13 +278,13 @@ def determine_domain_expertise(action_document_text):
         raw_content = response.choices[0].message.content.strip()  
   
         # Print the raw response for debugging  
-        print("Raw API Response:")  
-        print(raw_content)  
+        # print("Raw API Response:")  
+        # print(raw_content)  
   
         # Use regex to find JSON content  
         json_match = re.search(r'{.*}', raw_content, re.DOTALL)  
         if not json_match:  
-            print("No JSON content found in the response.")  
+            logging.warning("No JSON content found in the response.")  
             return (None, None, None)  
   
         cleaned_content = json_match.group(0)  
@@ -296,9 +295,7 @@ def determine_domain_expertise(action_document_text):
         elif cleaned_content.startswith("```"):  
             cleaned_content = cleaned_content[3:-3].strip()  
   
-        # Print the cleaned content for debugging  
-        print("Cleaned API Response:")  
-        print(cleaned_content)  
+        logging.info(f"Cleaned API Response: {cleaned_content}.")  
   
         # Validate and parse using Pydantic  
         try:  
@@ -312,11 +309,11 @@ def determine_domain_expertise(action_document_text):
             style_tone_voice = expertise_data.style_tone_voice  
             return (domain_subject_matter, experience_expertise_qualifications, style_tone_voice)  
         except (ValidationError, json.JSONDecodeError) as e:  
-            print(f"Validation or JSON error: {str(e)}")  
+            logging.warning(f"Validation or JSON error: {str(e)}")  
             return (None, None, None)  
   
     except Exception as e:  
-        print(f"Error during domain expertise determination: {str(e)}")  
+        logging.warning(f"Error during domain expertise determination: {str(e)}")  
         return (None, None, None)  
   
 # Define the Pydantic model for validation  
@@ -438,7 +435,7 @@ def check_for_conflicts(action_document_text, domain, expertise, style):
     ] 
     # Calculate and display tokens used  
     tokens_used = calculate_tokens(messages)  
-    print(f"Tokens used in this API call: {tokens_used}") 
+    logging.info(f"Tokens used in this API call: {tokens_used}") 
   
     try:  
         response = call_api_with_retries(messages)  
@@ -529,7 +526,7 @@ def call_llm_api(messages):
         )  
         return response.choices[0].message.content.strip()  
     except Exception as e:  
-        print(f"Unexpected error: {e}")  
+        logging.warning(f"Unexpected error: {e}")  
         return None  
   
 def parse_and_validate_json(analysis_output):  
@@ -545,13 +542,13 @@ def parse_and_validate_json(analysis_output):
             figure_analysis_results = FigureAnalysisResults(**json_data)  
             return figure_analysis_results.dict()  
         except json.JSONDecodeError as e:  
-            print(f"JSON decoding error during validation: {e}")  
-            print(f"Analysis output content causing error: {analysis_output}")  
+            logging.warning(f"JSON decoding error during validation: {e}")  
+            logging.warning(f"Analysis output content causing error: {analysis_output}")  
         except ValidationError as e:  
-            print(f"Validation error: {e.json()}")  
-            print(f"Analysis output content causing error: {analysis_output}")  
+            logging.warning(f"Validation error: {e.json()}")  
+            logging.warning(f"Analysis output content causing error: {analysis_output}")  
     else:  
-        print("No content received from OpenAI API.")  
+        logging.warning("No content received from OpenAI API.")  
     return None  
   
 def extract_figures_and_text(conflict_results, ref_documents_texts, domain, expertise, style):  
@@ -568,7 +565,7 @@ def extract_figures_and_text(conflict_results, ref_documents_texts, domain, expe
     ] 
     # Calculate and display tokens used  
     tokens_used = calculate_tokens(messages)  
-    print(f"Tokens used in this API call: {tokens_used}") 
+    logging.info(f"Tokens used in this API call: {tokens_used}") 
   
     analysis_output = call_llm_api(messages)  
     return parse_and_validate_json(analysis_output) 
@@ -632,11 +629,11 @@ def validate_and_parse_jsons(json_string):
         details = FoundationalClaimDetails(**parsed_json)  
         return details.dict()  
     except json.JSONDecodeError as e:  
-        print(f"JSON decoding error: {e}")  
-        print(f"Raw response: {json_string}")  
+        logging.warning(f"JSON decoding error: {e}")  
+        logging.warning(f"Raw response: {json_string}")  
     except ValidationError as e:  
-        print(f"Validation error: {e.json()}")  
-        print(f"Raw response: {json_string}")  
+        logging.warning(f"Validation error: {e.json()}")  
+        logging.warning(f"Raw response: {json_string}")  
     return None  
   
 def extract_details_from_filed_application(filed_application_text, foundational_claim, domain, expertise, style):  
@@ -650,7 +647,7 @@ def extract_details_from_filed_application(filed_application_text, foundational_
     ]  
     # Calculate and display tokens used  
     tokens_used = calculate_tokens(messages)  
-    print(f"Tokens used in this API call: {tokens_used}")
+    logging.info(f"Tokens used in this API call: {tokens_used}")
   
     try:  
         response = client.chat.completions.create(  
@@ -658,16 +655,16 @@ def extract_details_from_filed_application(filed_application_text, foundational_
         )  
   
         content = response.choices[0].message.content.strip()  
-        print(f"Raw response: {content}")  
+        logging.info(f"Raw response: {content}")  
   
         json_string = extract_json_contents(content)  
         if json_string:  
             return validate_and_parse_jsons(json_string)  
         else:  
-            print("No JSON content extracted.")  
+            logging.warning("No JSON content extracted.")  
             return None  
     except Exception as e:  
-        print(f"Error extracting details from filed application: {e}")  
+        logging.error(f"Error extracting details from filed application: {e}")  
         return None 
 
 
@@ -758,7 +755,7 @@ def extract_and_modify_filed_application(filed_application_details, pending_clai
             json_string = content  
   
         # Print raw response for debugging  
-        print(f"Raw response: {content}")  
+        logging.info(f"Raw response: {content}")  
         return json_string
   
         # Validate JSON structure  
@@ -781,7 +778,7 @@ def extract_and_modify_filed_application(filed_application_details, pending_clai
             #print("No JSON content extracted.")  
             #return None  
     except Exception as e:  
-        print(f"Error extracting details from filed application: {e}")  
+        logging.warning(f"Error extracting details from filed application: {e}")  
         return None 
   
  
@@ -954,16 +951,13 @@ def format_analysis_output(response_content):
     try:  
         return json.loads(response_content)  
     except json.JSONDecodeError:  
-        print(response_content)  # Print the raw response if JSON decoding fails  
+        logging.warning(response_content)  # Print the raw response if JSON decoding fails  
         return response_content  # Return the raw response as fallback  
   
 def analyze_filed_application(extracted_details, foundational_claim, dependent_claim, figure_analysis, domain, expertise, style):  
     """Analyze the filed application based on the foundational claim, figure analysis, and application details."""  
     content = generate_content(domain, expertise, style)  
     prompt = generate_analysis_prompt(extracted_details, foundational_claim, dependent_claim, figure_analysis)
-    print("--------------------") 
-    print(prompt) 
-    print("------------------")
     few_shot_example, text_a = generate_few_shot_examples()  
   
     messages = [  
@@ -974,7 +968,7 @@ def analyze_filed_application(extracted_details, foundational_claim, dependent_c
     ] 
     # Calculate and display tokens used  
     tokens_used = calculate_tokens(messages)  
-    print(f"Tokens used in this API call: {tokens_used}") 
+    logging.info(f"Tokens used in this API call: {tokens_used}") 
   
     base_delay = 1  
     max_delay = 32  
@@ -1141,13 +1135,13 @@ def analyze_modified_application(filed_app_details_json, cited_references_text, 
         except json.JSONDecodeError:  
             return analysis_output  
     except Exception as e:  
-        print(f"Error during modified application analysis: {e}")  
+        logging.warning(f"Error during modified application analysis: {e}")  
         return None  
   
   
 def save_analysis_to_word(analysis_output):
     if not analysis_output:
-        print("Analysis data is missing or empty.")
+        logging.warning("Analysis data is missing or empty.")
         return None
 
     # Create a new Word document
