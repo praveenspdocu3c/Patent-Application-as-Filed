@@ -121,14 +121,22 @@ def get_tokenizer():
     return tiktoken.encoding_for_model(model_name) 
 tokenizer = get_tokenizer() 
 
-def calculate_tokens(messages):  
-    # Calculate the total number of tokens for the given messages  
+def calculate_tokens(messages):    
+    """Calculate the number of tokens used by a list of messages."""  
+    encoding = tokenizer  
+    tokens_per_message = 3  # Every message follows <im_start>{role/name}\n{content}<im_end>\n  
+    tokens_per_name = 1  # If there's a name, the role is omitted  
+
     total_tokens = 0  
     for message in messages:  
-        # Encode the message content to get the number of tokens  
-        tokenized_message = tokenizer.encode(message['content'])  
-        total_tokens += len(tokenized_message)  
+        total_tokens += tokens_per_message  
+        for key, value in message.items():  
+            total_tokens += len(encoding.encode(value))  
+            if key == 'name':  
+                total_tokens += tokens_per_name  
+    total_tokens += 1  # Every reply is primed with <im_start>assistant  
     return total_tokens  
+
 # Preprocessing function  
 def process_text(text):
  logging.info("Started processing text.")   
