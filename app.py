@@ -929,14 +929,20 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
       
     Format for Each Amendment:  
     Amendment [Number]: [Feature Title]  
-    Original Claim Language:  
-    "[Insert the exact original feature description from the Application as Filed here. Only include the entire exact original feature description from the Application as Filed.]"
+    Original Claim Language: 
+    "[Insert the exact original feature description from the Application as Filed. Only include the entire exact original feature description from the Application as Filed.]"
+    
     Proposed Amended Language:  
-    "[Insert the enhanced feature description, incorporating new details, specific materials, or configurations. Only use the content from Application as Filed when proposing Amendments. **Underline** the new language proposed by enclosing it within '<u>' and '</u>' tags.]"      
+    "[Insert the enhanced feature description, incorporating new details, specific materials, or configurations. Only use the content from Application as Filed when proposing Amendments. **Underline** the new language proposed by enclosing it within '<u>' and '</u>' tags.]"  
+    
     Derivation of Amendment:  
-    Source Reference: Cite specific sections, paragraphs, figures, or embodiments from the application as filed text that support the amendment. Example: "Derived from Paragraph [0123] and Figure 5 of the application.
-    Ignore citing specific sections that are in the ABSTRACT or in the SUMMARY section.
-    Reasoning: Explain why the amendment was made, detailing how it enhances specificity, overcomes prior art, or adds technical advantages. Highlight any differences from the cited references. Emphasize any technical advantages or improvements introduced by the amendments.  
+    Source Reference: Carefully cite the exact sections, paragraphs, figures, or embodiments from the Application as Filed that directly support the amendment. Ensure the citations accurately correspond to the content used in the amendment. 
+    Source Reference: For example, "Derived from Paragraph [0032] of the application, which describes the specific configuration..." or "Supported by Figure 4, illustrating the component layout..."
+    Verification Step: Before finalizing, cross-check all source references to ensure they match the provided Application as Filed content.
+    Reasoning: 
+    Explain why the amendment was made, detailing how it enhances specificity, overcomes prior art, or adds technical advantages. Highlight any differences from the cited references. Emphasize any technical advantages or improvements introduced by the amendments.  
+    Provide arguments supporting novelty and non-obviousness over the cited reference.
+    Emphasize any technical advantages or improvements introduced by the amendments.   
     """  
   
 def format_analysis_output(response_content):  
