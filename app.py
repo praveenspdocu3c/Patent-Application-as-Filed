@@ -1157,6 +1157,7 @@ def save_analysis_to_word(analysis_output):
     # Add a heading for the document
     doc.add_heading("Filed Application Analysis Results", level=1)
 
+    print(analysis_output)
     # Split the analysis output into lines
     lines = analysis_output.split("\n")
     for line in lines:
@@ -1164,11 +1165,31 @@ def save_analysis_to_word(analysis_output):
         
         # Handle different levels of headings
         if line.startswith("## "):
-            doc.add_heading(line[3:], level=2)
+            doc.add_heading(line[3:], level=2) 
         elif line.startswith("### "):
             doc.add_heading(line[4:], level=3)
         elif line.startswith("#### "):
             doc.add_heading(line[5:], level=4)
+        elif line.startswith("- **"):
+            # Sub-points with bold keywords
+            paragraph = doc.add_paragraph(style="List Bullet")
+            parts = re.split(r"(\*\*[^*]+\*\*:?)", line[2:].strip())
+            for part in parts:
+                if part.startswith("**") and part.endswith(":**"):
+                    # Bold text with colon
+                    bold_text = part[2:-3]  # Remove '**' at the start and ':**' at the end
+                    run = paragraph.add_run(bold_text)
+                    run.bold = True
+                    paragraph.add_run(":")  # Add colon after bold text
+                elif part.startswith("**") and part.endswith("**"):
+                    # Bold text without colon
+                    bold_text = part[2:-2]  # Remove '**' at the start and end
+                    run = paragraph.add_run(bold_text)
+                    run.bold = True
+                else:
+                    # Regular text
+                    paragraph.add_run(part)
+                    
         elif line.startswith("- ") or line.startswith("* "):
             doc.add_paragraph(line[2:], style="List Bullet")
         elif re.match(r"^\d+\.", line):
