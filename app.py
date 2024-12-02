@@ -1562,7 +1562,7 @@ with st.expander("Step 1: Office Action", expanded=True):
                         # Determine domain expertise using the summarized text  
                         domain, expertise, style = determine_domain_expertise(summarized_text)  
                         if not (domain and expertise and style):  
-                            st.error("Failed to determine domain expertise.")  
+                            st.error("Failed to determine domain expertise. Please try again!")  
                         else:  
                             st.session_state.domain = domain  
                             st.session_state.expertise = expertise  
