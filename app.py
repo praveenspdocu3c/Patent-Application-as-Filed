@@ -934,7 +934,9 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
     -for all the points in the foundational claim, it is mandatory to propose amendments.
     -the amendments should be proposed for the application as filed.  
     Present original and proposed versions, highlighting new features, specific materials, or configurations. **Underline** the new language proposed by enclosing it within '<u>' and '</u>' tags.  
-      
+
+    Verification Step: Before finalizing, cross-check all source references to ensure they match the provided Application as Filed content.
+    
     Format for Each Amendment:  
     Amendment [Number]: [Feature Title]  
     Original Claim Language: 
@@ -946,7 +948,6 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
     Derivation of Amendment:  
     Source Reference: Carefully cite the exact sections, paragraphs, figures, or embodiments from the Application as Filed that directly support the amendment. Ensure the citations accurately correspond to the content used in the amendment. 
     Source Reference: For example, "Derived from Paragraph [0032] of the application, which describes the specific configuration..." or "Supported by Figure 4, illustrating the component layout..."
-    Verification Step: Before finalizing, cross-check all source references to ensure they match the provided Application as Filed content.
     Reasoning: 
     Explain why the amendment was made, detailing how it enhances specificity, overcomes prior art, or adds technical advantages. Highlight any differences from the cited references. Emphasize any technical advantages or improvements introduced by the amendments.  
     Provide arguments supporting novelty and non-obviousness over the cited reference.
