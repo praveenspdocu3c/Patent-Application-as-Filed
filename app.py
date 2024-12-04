@@ -1,3 +1,5 @@
+# Final Updated in Cloud
+
 import fitz  # PyMuPDF for PDF extraction  
 from openai import AzureOpenAI  
 from dotenv import load_dotenv  
@@ -934,9 +936,7 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
     -for all the points in the foundational claim, it is mandatory to propose amendments.
     -the amendments should be proposed for the application as filed.  
     Present original and proposed versions, highlighting new features, specific materials, or configurations. **Underline** the new language proposed by enclosing it within '<u>' and '</u>' tags.  
-
-    Verification Step: Before finalizing, cross-check all source references to ensure they match the provided Application as Filed content.
-    
+      
     Format for Each Amendment:  
     Amendment [Number]: [Feature Title]  
     Original Claim Language: 
@@ -948,6 +948,7 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
     Derivation of Amendment:  
     Source Reference: Carefully cite the exact sections, paragraphs, figures, or embodiments from the Application as Filed that directly support the amendment. Ensure the citations accurately correspond to the content used in the amendment. 
     Source Reference: For example, "Derived from Paragraph [0032] of the application, which describes the specific configuration..." or "Supported by Figure 4, illustrating the component layout..."
+    Verification Step: Before finalizing, cross-check all source references to ensure they match the provided Application as Filed content.
     Reasoning: 
     Explain why the amendment was made, detailing how it enhances specificity, overcomes prior art, or adds technical advantages. Highlight any differences from the cited references. Emphasize any technical advantages or improvements introduced by the amendments.  
     Provide arguments supporting novelty and non-obviousness over the cited reference.
@@ -1459,11 +1460,13 @@ def check_match_with_llm(text, cited_docs):
     messages = [  
         {  
             "role": "system",  
-            "content": "Identify if any part of the text approximately matches any item in the given array. Respond with 'Yes' or 'No'."  
+            "content": "You are tasked with analyzing a document to determine if any sections approximately match items in a provided list called 'Cited Documents.' Your goal is to carefully compare the text in the document with the items in the list and respond with 'Yes' if there is an approximate match and 'No' if there is not."  
         },  
         {  
             "role": "user",  
-            "content": f"Text: {text}\nCited Documents: {cited_docs}"  
+            "content": f"""Check if any part of the text in the document approximately matches any item in the given array Cited Documents. Respond with 'Yes' or 'No'.
+                           Text: {text}\n 
+                           Cited Documents: {cited_docs}""" 
         }  
     ]  
   
@@ -1471,7 +1474,7 @@ def check_match_with_llm(text, cited_docs):
         response = client.chat.completions.create(  
             model="GPT-4-Omni",  
             messages=messages,  
-            temperature=0.2  
+            temperature=0.2
         )  
           
         llm_response = response.choices[0].message.content.strip()  
@@ -1514,6 +1517,11 @@ if 'application_number' not in st.session_state:
 st.image("AFS Innovation Logo.png", width=200)  
 st.title("Patent Analyzer")  
   
+def count_tokens(text, model="gpt-4o"):
+    encoding = tiktoken.encoding_for_model(model)
+    tokens = encoding.encode(text)
+    return len(tokens)
+
 # Step 1: Upload Examiner Document and Check Conflicts  
 with st.expander("Step 1: Office Action", expanded=True):  
     st.write("### Upload the Examiner Document and Check for Conflicts")  
@@ -1524,6 +1532,8 @@ with st.expander("Step 1: Office Action", expanded=True):
         if uploaded_examiner_file is None:  
             st.warning("Please upload the examiner document first.")  
         else:  
+            # Type(text) = string
+            
             is_valid, application_number, conflict_keyword = validate_office_action(uploaded_examiner_file)  
             if not is_valid:  
                 st.error("Failed to process the uploaded file.")  
@@ -1562,7 +1572,7 @@ with st.expander("Step 1: Office Action", expanded=True):
                         # Determine domain expertise using the summarized text  
                         domain, expertise, style = determine_domain_expertise(summarized_text)  
                         if not (domain and expertise and style):  
-                            st.error("Failed to determine domain expertise. Please try again!")  
+                            st.error("Failed to determine domain expertise.")  
                         else:  
                             st.session_state.domain = domain  
                             st.session_state.expertise = expertise  
@@ -1613,9 +1623,10 @@ if st.session_state.get("conflict_results") is not None:
                     folder_name = st.session_state.application_number  
                     upload_file_to_blob(temp_file_path, uploaded_ref_file.name, folder_name)  
   
-                    extracted_ref_text = extract_and_process_text_from_pdf(temp_file_path)  
+                    extracted_ref_text = extract_and_process_text_from_pdf(temp_file_path) 
+                    # st.warning(extracted_ref_text) 
                     if extracted_ref_text:  
-                        match_found = check_match_with_llm("\n".join(extracted_ref_text), cited_docs)  
+                        match_found = check_match_with_llm("\n".join(extracted_ref_text), cited_docs)              
                         if match_found:  
                             processed_ref_text = "\n".join(extracted_ref_text)  
                             ref_texts.append(processed_ref_text)  
