@@ -226,7 +226,11 @@ def summarize_text(processed_text):
         # Calculate and display tokens used for summarization  
         tokens_used = calculate_tokens(messages)  
         logging.info(f"Tokens used for summarization: {tokens_used}")  
-  
+        
+        # if tokens_used>125000:
+        #     st.warning('Document contents so far is too large to query not processing documents further. Results may be inaccurate, consider uploading smaller documents. .', icon="⚠️") 
+        #     return None
+        
         # Call OpenAI API for summarization  
         response = client.chat.completions.create(  
             model="GPT-4-Omni", messages=messages, temperature=0.5  
@@ -278,7 +282,12 @@ def determine_domain_expertise(action_document_text):
     tokens_used = calculate_tokens(messages)  
     logging.info(f"Tokens used in this API call: {tokens_used}") 
   
-    try:  
+    try:
+        
+        if tokens_used>125000:
+            st.warning('Document contents so far is too large to query not processing documents further. Results may be inaccurate, consider uploading smaller documents. .', icon="⚠️") 
+            return None
+  
         # Call OpenAI API for domain expertise determination  
         response = client.chat.completions.create(  
             model="GPT-4-Omni", messages=messages, temperature=0.6  
@@ -448,6 +457,10 @@ def check_for_conflicts(action_document_text, domain, expertise, style):
     logging.info(f"Tokens used in this API call: {tokens_used}") 
   
     try:  
+        if tokens_used>125000:
+            st.warning('Document contents so far is too large to query not processing documents further. Results may be inaccurate, consider uploading smaller documents. .', icon="⚠️") 
+            return None
+
         response = call_api_with_retries(messages)  
         content = response.choices[0].message.content.strip()  
         json_string = extract_json_response(content)  
@@ -660,6 +673,11 @@ def extract_details_from_filed_application(filed_application_text, foundational_
     logging.info(f"Tokens used in this API call: {tokens_used}")
   
     try:  
+        
+        if tokens_used>125000:
+            st.warning('Document contents so far is too large to query not processing documents further. Results may be inaccurate, consider uploading smaller documents. .', icon="⚠️") 
+            return None
+
         response = client.chat.completions.create(  
             model="GPT-4-Omni", messages=messages, temperature=0.2  
         )  
@@ -1460,7 +1478,7 @@ def check_match_with_llm(text, cited_docs):
     messages = [  
         {  
             "role": "system",  
-            "content": "You are tasked with analyzing a document to determine if any sections approximately match items in a provided list called 'Cited Documents.' Your goal is to carefully compare the text in the document with the items in the list and respond with 'Yes' if there is an approximate match and 'No' if there is not."  
+            "content": "Check if any part of the text in the document approximately matches any item in the given array Cited Documents. Respond with 'Yes' or 'No'."  
         },  
         {  
             "role": "user",  
@@ -1471,6 +1489,13 @@ def check_match_with_llm(text, cited_docs):
     ]  
   
     try:  
+        tokens_used = calculate_tokens(messages)  
+        logging.info(f"Tokens used in this API call: {tokens_used}") 
+
+        if tokens_used>125000:
+            st.warning('Document contents so far is too large to query not processing documents further. Results may be inaccurate, consider uploading smaller documents. .', icon="⚠️") 
+            return False
+
         response = client.chat.completions.create(  
             model="GPT-4-Omni",  
             messages=messages,  
@@ -1517,7 +1542,7 @@ if 'application_number' not in st.session_state:
 st.image("AFS Innovation Logo.png", width=200)  
 st.title("Patent Analyzer")  
   
-def count_tokens(text, model="gpt-4o"):
+def count_tokens(text, model="GPT-4-Omni"):
     encoding = tiktoken.encoding_for_model(model)
     tokens = encoding.encode(text)
     return len(tokens)
@@ -1612,8 +1637,8 @@ if st.session_state.get("conflict_results") is not None:
             if uploaded_ref_files:  
                 ref_texts = []  
                 cited_docs = st.session_state.cited_documents  
-                continue_processing = False  
-  
+                continue_processing = False 
+                        
                 for uploaded_ref_file in uploaded_ref_files:  
                     temp_file_path = f"temp_{uploaded_ref_file.name}"  
                     with open(temp_file_path, "wb") as f:  
@@ -1623,8 +1648,9 @@ if st.session_state.get("conflict_results") is not None:
                     folder_name = st.session_state.application_number  
                     upload_file_to_blob(temp_file_path, uploaded_ref_file.name, folder_name)  
   
-                    extracted_ref_text = extract_and_process_text_from_pdf(temp_file_path) 
-                    # st.warning(extracted_ref_text) 
+                    extracted_ref_text = extract_and_process_text_from_pdf(temp_file_path)
+                    # Type(extracted_ref_text) = string 
+
                     if extracted_ref_text:  
                         match_found = check_match_with_llm("\n".join(extracted_ref_text), cited_docs)              
                         if match_found:  
