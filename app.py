@@ -1,5 +1,3 @@
-# Final Updated in Cloud
-
 import fitz  # PyMuPDF for PDF extraction  
 from openai import AzureOpenAI  
 from dotenv import load_dotenv  
@@ -162,7 +160,8 @@ def process_text(text):
     return processed_text  
  except Exception as e:  
         logging.error(f"Error processing text: {e}")  
-        raise    
+        raise  
+      
 def process_text_with_page_numbers(file_content):  
     logging.info("Started processing text with page numbers.")  
     try:  
@@ -184,16 +183,16 @@ def process_text_with_page_numbers(file_content):
             page_number = page.page_number  
             text = "\n".join([line.content for line in page.lines])  
   
-            words = word_tokenize(text)  
-            processed_words = [  
-                lemmatizer.lemmatize(word.lower())  
-                for word in words  
-                if word.lower() not in stop_words and word.lower() not in string.punctuation  
-            ]  
-            processed_text = ' '.join(processed_words)  
-            processed_text = ' '.join(processed_text.split())  
+            # words = word_tokenize(text)  
+            # processed_words = [  
+            #     lemmatizer.lemmatize(word.lower())  
+            #     for word in words  
+            #     if word.lower() not in stop_words and word.lower() not in string.punctuation  
+            # ]  
+            # processed_text = ' '.join(processed_words)  
+            # processed_text = ' '.join(processed_text.split())  
   
-            processed_text_with_page = f"{processed_text} [Page {page_number}]"  
+            processed_text_with_page = f"{text} [Page {page_number}]"  
             processed_pages.append(processed_text_with_page)  
   
         logging.info("Completed processing text with page numbers.")  
@@ -211,6 +210,7 @@ def extract_and_process_text_from_pdf(uploaded_pdf_path):
     except Exception as e:  
         logging.error(f"Failed to process the file: {e}")  
         return None  
+    
 def summarize_text(processed_text):  
     """Summarize the processed text using OpenAI's API."""  
     prompt = f"""Summarize the following document text concisely:  
@@ -474,31 +474,7 @@ def check_for_conflicts(action_document_text, domain, expertise, style):
 class FigureAnalysisResults(BaseModel):  
     figures_analysis: list  
     extracted_paragraphs: list  
-  
-def generate_system_content(domain, expertise, style):  
-    """Generate system content based on domain, expertise, and style."""  
-    return f"""  
-    You are now assuming the role of a deeply specialized expert in {domain} as well as a comprehensive understanding of patent law specific to the mentioned domain. Your expertise includes:  
-    1. {domain}  
-    2. Patent Law Proficiency:  
-        a. Skilled in interpreting and evaluating patent claims, classifications, and legal terminologies.  
-        b. Knowledgeable about the structure and requirements of patent applications.  
-        c. Expertise in comparing similar documents for patent claims under sections U.S.C 102 (novelty) and U.S.C 103 (non-obviousness).  
-    3. {expertise}  
-    4. Capability to Propose Amendments:  
-        a. Experienced in responding to examiners’ assertions or rejections of claims.  
-        b. Skilled in proposing suitable amendments to patent claims to address rejections under U.S.C 102 (novelty) and U.S.C 103 (non-obviousness).  
-        c. Proficient in articulating and justifying amendments to ensure compliance with patentability requirements.  
-    Adopt a {style} suitable for analyzing patent applications in the given domain and subject matter. Your analysis should include:  
-    a. A thorough evaluation of the technical details and functionalities described in the patent application.  
-    b. An assessment of the clarity and precision of the technical descriptions and diagrams.  
-    c. An analysis of the novelty (under U.S.C 102) and non-obviousness (under U.S.C 103) of the subject matter by comparing it with similar existing documents.  
-    d. Feedback on the strengths and potential areas for improvement in the document.  
-    e. A determination of whether the invention meets the criteria for patentability under sections U.S.C 102 and U.S.C 103.  
-    f. Proposals for suitable amendments to the claims in response to potential examiners’ assertions or rejections, ensuring the claims are robust and meet patentability standards.  
-    Using this expertise, experience, and educational background, analyze the provided patent application document with a focus on its technical accuracy, clarity, adherence to patent application standards, novelty, non-obviousness, and overall feasibility.  
-    """  
-  
+    
 def generate_figure_analysis_prompt(fig_details, text_details, ref_documents_texts):  
     """Generate prompt for figure analysis."""  
     return f"""  
@@ -593,28 +569,6 @@ def extract_figures_and_text(conflict_results, ref_documents_texts, domain, expe
     analysis_output = call_llm_api(messages)  
     return parse_and_validate_json(analysis_output) 
 
-def generate_system_content(domain, expertise, style):  
-    return f"""  
-    You are now assuming the role of a deeply specialized expert in {domain} as well as a comprehensive understanding of patent law specific to the mentioned domain. Your expertise includes:  
-    1. {domain}  
-    2. Patent Law Proficiency:  
-        a. Skilled in interpreting and evaluating patent claims, classifications, and legal terminologies.  
-        b. Knowledgeable about the structure and requirements of patent applications.  
-        c. Expertise in comparing similar documents for patent claims under sections U.S.C 102 (novelty) and U.S.C 103 (non-obviousness).  
-    3. {expertise}  
-    4. Capability to Propose Amendments:  
-        a. Experienced in responding to examiners’ assertions or rejections of claims.  
-        b. Skilled in proposing suitable amendments to patent claims to address rejections under U.S.C 102 (novelty) and U.S.C 103 (non-obviousness).  
-        c. Proficient in articulating and justifying amendments to ensure compliance with patentability requirements.  
-    Adopt a {style} suitable for analyzing patent applications in the given domain and subject matter. Your analysis should include:  
-    a. A thorough evaluation of the technical details and functionalities described in the patent application.  
-    b. An assessment of the clarity and precision of the technical descriptions and diagrams.  
-    c. An analysis of the novelty (under U.S.C 102) and non-obviousness (under U.S.C 103) of the subject matter by comparing it with similar existing documents.  
-    d. Feedback on the strengths and potential areas for improvement in the document.  
-    e. A determination of whether the invention meets the criteria for patentability under sections U.S.C 102 and U.S.C 103.  
-    f. Proposals for suitable amendments to the claims in response to potential examiners’ assertions or rejections, ensuring the claims are robust and meet patentability standards.  
-    Using this expertise, experience, and educational background, analyze the provided patent application document with a focus on its technical accuracy, clarity, adherence to patent application standards, novelty, non-obviousness, and overall feasibility.  
-    """  
   
 def generate_user_prompts(filed_application_text, foundational_claim):  
     return f"""  
@@ -645,20 +599,7 @@ def extract_json_contents(response_content):
             return response_content[start_index + 7:end_index].strip()  
         return response_content[start_index + 7:].strip()  
     return response_content.strip()  
-  
-def validate_and_parse_jsons(json_string):  
-    try:  
-        parsed_json = json.loads(json_string)  
-        details = FoundationalClaimDetails(**parsed_json)  
-        return details.dict()  
-    except json.JSONDecodeError as e:  
-        logging.warning(f"JSON decoding error: {e}")  
-        logging.warning(f"Raw response: {json_string}")  
-    except ValidationError as e:  
-        logging.warning(f"Validation error: {e.json()}")  
-        logging.warning(f"Raw response: {json_string}")  
-    return None  
-  
+    
 def extract_details_from_filed_application(filed_application_text, foundational_claim, domain, expertise, style):  
     """Extract details from the filed application related to the foundational claim."""  
     content = generate_system_content(domain, expertise, style)  
@@ -687,7 +628,7 @@ def extract_details_from_filed_application(filed_application_text, foundational_
   
         json_string = extract_json_contents(content)  
         if json_string:  
-            return validate_and_parse_jsons(json_string)  
+            return validate_and_parse_json(json_string)  
         else:  
             logging.warning("No JSON content extracted.")  
             return None  
@@ -948,17 +889,64 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
     Identify areas where the foundational claim can be distinguished from the cited reference. Focus on unique structural features, specific materials, configurations, or functions not disclosed in the cited reference.  
   
     Proposed Amendments and Arguments:  
-    For each key feature point in the foundational claim, propose specific amendments separately.
-    Ensure that the suggested amendments are not conflicting with any of the dependent claims.   
-    NOTE: 
-    -for all the points in the foundational claim, it is mandatory to propose amendments.
-    -the amendments should be proposed for the application as filed.  
-    Present original and proposed versions, highlighting new features, specific materials, or configurations. **Underline** the new language proposed by enclosing it within '<u>' and '</u>' tags.  
+        1. Identify Key Feature Points:
+        - Carefully read the foundational claim of the patent application as filed.  
+        - Break down the claim into individual key feature points for clarity.  
+
+        2. Propose Specific Amendments:
+        - For **each** key feature point identified, propose a specific amendment aimed at improving the claim.  
+        - Amendments may include:  
+            - Clarifying ambiguous or broad language.  
+            - Refining the claim scope to better distinguish over prior art.  
+            - Correcting errors or inconsistencies.  
+            - Enhancing the claim's precision and specificity.  
+            - Reorganizing claim elements for better logical flow.  
+        - Ensure that all proposed amendments are fully supported by the original disclosure in the patent application as filed.  
+        - **It is mandatory to propose an amendment for every key feature point.**  
+
+        3. Check for Consistency with Dependent Claims:  
+        - Review all dependent claims to ensure that your proposed amendments to the foundational claim do not create conflicts or inconsistencies.  
+        - If a conflict arises, adjust the amendment or suggest corresponding changes to dependent claims to maintain consistency within the claim set.  
+
+        4. Present Original and Amended Versions:  
+        - For each key feature point, present both the **original claim language** and the **proposed amended language**.  
+        - **Underline** the new or modified language by enclosing it within `<u>` and `</u>` tags.  
+        - The amendments should not be restricted to introducing new features, specific materials, or configurations. Consider all types of improvements that enhance the claim while staying within the original disclosure.  
+
+        5. Sample Examples:
+            *Examples:*  
+            - **Feature Point 1 (Process Step Clarification):**  
+            - *Original Claim Language:* "A method comprising mixing substances A and B."  
+            - *Proposed Amended Language:* "A method comprising mixing substances A and B `<u>`at a ratio of 1:1`</u>`."  
+
+            - **Feature Point 2 (Element Specification):**  
+            - *Original Claim Language:* "An apparatus having a display."  
+            - *Proposed Amended Language:* "An apparatus having a `<u>`touch-sensitive`</u>` display."  
+
+            - **Feature Point 3 (Functional Improvement):**  
+            - *Original Claim Language:* "The system processes data received from a sensor."  
+            - *Proposed Amended Language:* "The system `<u>`analyzes and filters`</u>` data received from a sensor."  
+
+            - **Feature Point 4 (Structural Adjustment):**  
+            - *Original Claim Language:* "A device comprising components X, Y, and Z."  
+            - *Proposed Amended Language:* "A device comprising `<u>`components X and Y interconnected with component Z`</u>`."  
+
+        6. Final Review:  
+        - Ensure that all proposed amendments collectively improve the claim without introducing new matter or exceeding the original disclosure from application as filed.  
+        - Verify that the amended language is clear, precise, and adheres to patent drafting standards.  
+        - Confirm that the claim remains fully supported by the description, drawings, and any other parts of the application as filed.  
+        ---  
+        Notes: 
+        - **Mandatory Amendments:** An amendment must be proposed for every key feature point in the foundational claim.  
+        - **Support from Original Application:** All amendments must be based on the content of the patent application as originally filed; new matter cannot be introduced.  
+        - **Scope of Amendments:** Proposed amendments are not restricted to introducing new features, specific materials, or configurations. They may include clarifications, refinements, corrections, or structural improvements that enhance the clarity and enforceability of the claim.  
+        - **Conflict Avoidance:** Amendments should not create conflicts with dependent claims. If necessary, suggest corresponding amendments to dependent claims to maintain consistency across the claim set.  
+        --- 
       
     Format for Each Amendment:  
     Amendment [Number]: [Feature Title]  
     Original Claim Language: 
-    "[Insert the exact original feature description from the Application as Filed. Only include the entire exact original feature description from the Application as Filed.]"
+    "[Please extract the exact full original text of foundational claim from application as Filed, ensuring that it is copied verbatim without any omissions or alterations.]"
     
     Proposed Amended Language:  
     "[Insert the enhanced feature description, incorporating new details, specific materials, or configurations. Only use the content from Application as Filed when proposing Amendments. **Underline** the new language proposed by enclosing it within '<u>' and '</u>' tags.]"  
@@ -1026,7 +1014,7 @@ def analyze_filed_application(extracted_details, foundational_claim, dependent_c
             logging.warning(f"Retrying in {jitter:.2f} seconds (attempt {attempt + 1}) due to error: {e}")  
             time.sleep(jitter) 
   
-  
+
 def analyze_modified_application(filed_app_details_json, cited_references_text, foundational_claim, dependent_claim, figure_analysis, modified_application_details, domain, expertise, style): 
     content = f"""
    You are now assuming the role of a deeply specialized expert in {domain} as well as a comprehensive understanding of patent law specific to the mentioned domain. Your expertise includes:
@@ -1095,14 +1083,65 @@ def analyze_modified_application(filed_app_details_json, cited_references_text, 
     Identify areas where the foundational claim can be distinguished from the cited reference.
     Focus on unique structural features, specific materials, configurations, or functions not disclosed in the cited reference.
 
-    Proposed Amendments and Arguments:
-    For each key feature point in the foundational claim, propose specific amendments separately. NOTE: for all the points in the foundational claim, it is mandatory to propose amendments.
-    Ensure that the suggested amendments are not conflicting with any of the dependance claim.
-    Present original and proposed versions, highlighting new features, specific materials, or configurations.
-    
+    Proposed Amendments and Arguments:  
+        1. Identify Key Feature Points:
+        - Carefully read the foundational claim of the patent application as filed.  
+        - Break down the claim into individual key feature points for clarity.  
+
+        2. Propose Specific Amendments:
+        - For **each** key feature point identified, propose a specific amendment aimed at improving the claim.  
+        - Amendments may include:  
+            - Clarifying ambiguous or broad language.  
+            - Refining the claim scope to better distinguish over prior art.  
+            - Correcting errors or inconsistencies.  
+            - Enhancing the claim's precision and specificity.  
+            - Reorganizing claim elements for better logical flow.  
+        - Ensure that all proposed amendments are fully supported by the original disclosure in the patent application as filed.  
+        - **It is mandatory to propose an amendment for every key feature point.**  
+
+        3. Check for Consistency with Dependent Claims:  
+        - Review all dependent claims to ensure that your proposed amendments to the foundational claim do not create conflicts or inconsistencies.  
+        - If a conflict arises, adjust the amendment or suggest corresponding changes to dependent claims to maintain consistency within the claim set.  
+
+        4. Present Original and Amended Versions:  
+        - For each key feature point, present both the **original claim language** and the **proposed amended language**.  
+        - **Underline** the new or modified language by enclosing it within `<u>` and `</u>` tags.  
+        - The amendments should not be restricted to introducing new features, specific materials, or configurations. Consider all types of improvements that enhance the claim while staying within the original disclosure.  
+
+        5. Sample Examples:
+            *Examples:*  
+            - **Feature Point 1 (Process Step Clarification):**  
+            - *Original Claim Language:* "A method comprising mixing substances A and B."  
+            - *Proposed Amended Language:* "A method comprising mixing substances A and B `<u>`at a ratio of 1:1`</u>`."  
+
+            - **Feature Point 2 (Element Specification):**  
+            - *Original Claim Language:* "An apparatus having a display."  
+            - *Proposed Amended Language:* "An apparatus having a `<u>`touch-sensitive`</u>` display."  
+
+            - **Feature Point 3 (Functional Improvement):**  
+            - *Original Claim Language:* "The system processes data received from a sensor."  
+            - *Proposed Amended Language:* "The system `<u>`analyzes and filters`</u>` data received from a sensor."  
+
+            - **Feature Point 4 (Structural Adjustment):**  
+            - *Original Claim Language:* "A device comprising components X, Y, and Z."  
+            - *Proposed Amended Language:* "A device comprising `<u>`components X and Y interconnected with component Z`</u>`."  
+
+        6. Final Review:  
+        - Ensure that all proposed amendments collectively improve the claim without introducing new matter or exceeding the original disclosure from application as filed.  
+        - Verify that the amended language is clear, precise, and adheres to patent drafting standards.  
+        - Confirm that the claim remains fully supported by the description, drawings, and any other parts of the application as filed.  
+        ---  
+        Notes: 
+        - **Mandatory Amendments:** An amendment must be proposed for every key feature point in the foundational claim.  
+        - **Support from Original Application:** All amendments must be based on the content of the patent application as originally filed; new matter cannot be introduced.  
+        - **Scope of Amendments:** Proposed amendments are not restricted to introducing new features, specific materials, or configurations. They may include clarifications, refinements, corrections, or structural improvements that enhance the clarity and enforceability of the claim.  
+        - **Conflict Avoidance:** Amendments should not create conflicts with dependent claims. If necessary, suggest corresponding amendments to dependent claims to maintain consistency across the claim set.  
+        --- 
+      
+    Format for Each Amendment:  
     Amendment [Number]: [Feature Title]  
     Original Claim Language: 
-    "[Insert the exact original feature description from the Application as Filed. Only include the entire exact original feature description from the Application as Filed.]"
+    "[Please extract the exact full original text of foundational claim from application as Filed, ensuring that it is copied verbatim without any omissions or alterations.]"
     
     Proposed Amended Language:  
     "[Insert the enhanced feature description, incorporating new details, specific materials, or configurations. Only use the content from Application as Filed when proposing Amendments. **Underline** the new language proposed by enclosing it within '<u>' and '</u>' tags.]"  
@@ -1139,8 +1178,7 @@ def analyze_modified_application(filed_app_details_json, cited_references_text, 
     Suggest additional arguments or amendments to further distinguish the foundational claim from the cited prior art.
     Include multiple amendments for thorough differentiation.
     Ensure that the original intent of the claims is maintained while improving clarity and scope.
-    """  
-      
+    """            
     messages = [  
         {  
             "role": "system",  
@@ -1154,6 +1192,10 @@ def analyze_modified_application(filed_app_details_json, cited_references_text, 
     ]  
       
     try:  
+        print("---------------------------------------------------------------------------------------------------------------------------------")
+        print(f"foundational claim:{json.dumps(foundational_claim, indent=2)} from Application as Filed:{json.dumps(filed_app_details_json, indent=2)}")
+        print("---------------------------------------------------------------------------------------------------------------------------------")
+
         response = client.chat.completions.create(  
             model="GPT-4-Omni", messages=messages, temperature=0.6  
         )  
@@ -1191,7 +1233,7 @@ def save_analysis_to_word(analysis_output):
     # Add a heading for the document
     doc.add_heading("Filed Application Analysis Results", level=1)
 
-    print(analysis_output)
+    # print(analysis_output)
     # Split the analysis output into lines
     lines = analysis_output.split("\n")
     for line in lines:
@@ -1743,7 +1785,7 @@ if st.session_state.get("figure_analysis") is not None:
                                     st.session_state.filed_application_analysis = filed_app_details_json  
   
                                     analysis_results = analyze_filed_application(  
-                                        filed_app_details_json,  
+                                        processed_filed_app_text,  
                                         st.session_state.foundational_claim,  
                                         st.session_state.dependent_claim,
                                         st.session_state.figure_analysis,  
@@ -1809,15 +1851,18 @@ if st.session_state.get("figure_analysis") is not None:
                             st.session_state.filed_application_analysis = filed_app_details_json  
   
                             analysis_results = analyze_filed_application(  
-                                st.session_state.filed_application_analysis,  
+                                processed_filed_app_text,  
                                 st.session_state.foundational_claim,  
                                 st.session_state.dependent_claim,
                                 st.session_state.figure_analysis,  
                                 st.session_state.domain,  
                                 st.session_state.expertise,  
                                 st.session_state.style  
-                            )  
-  
+                            )    
+                            print("---------------------------------------------------------------------------------------------------------------------------------")
+                            print(f"foundational claim:{json.dumps(st.session_state.foundational_claim, indent=2)} from Application as Filed:{processed_filed_app_text}")
+                            print("---------------------------------------------------------------------------------------------------------------------------------")
+        
                             if analysis_results:  
                                 st.session_state.filed_application_analysis = analysis_results  
                                 st.success("Filed application analysis completed successfully!")  
