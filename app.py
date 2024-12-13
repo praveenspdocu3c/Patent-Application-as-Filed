@@ -1060,7 +1060,7 @@ def analyze_filed_application(extracted_details, foundational_claim, dependent_c
     for attempt in range(max_attempts):  
         try:  
             response = client.chat.completions.create(  
-                model="GPT-4-Omni", messages=messages, temperature=0.2, max_tokens=8192  
+                model="GPT-4-Omni", messages=messages, temperature=0.7, max_tokens=8192  
             )  
             # analysis_output = response.choices[0].message.content.strip()  
             # return format_analysis_output(analysis_output)  
@@ -1270,7 +1270,7 @@ def analyze_modified_application(filed_app_details_json, cited_references_text, 
     try:  
 
         response = client.chat.completions.create(  
-            model="GPT-4-Omni", messages=messages, temperature=0.6  
+            model="GPT-4-Omni", messages=messages, temperature=0.7  
         )  
         analysis_output = response.choices[0].message.content.strip()  
           
