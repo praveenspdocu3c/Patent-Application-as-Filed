@@ -1,5 +1,3 @@
-# Final Updated in Cloud
-
 import fitz  # PyMuPDF for PDF extraction  
 from openai import AzureOpenAI  
 from dotenv import load_dotenv  
@@ -842,21 +840,25 @@ def generate_few_shot_examples():
     """Generate few-shot example for analysis."""  
     few_shot_example = """  
     **Example Amendment and Argument:**  
-    **Amendment 1: Enhanced Communication Protocol**  
+    **Amendment 1: Advanced Data Processing Method**  
+
     **Original Claim Language:**  
-    "A communication system comprising a transmitter and receiver."  
+    "A method for processing data in a distributed computing environment, the method comprising: receiving data from a plurality of data sources; aggregating the received data based on predefined criteria; applying a set of transformation algorithms to the aggregated data to generate processed data; storing the processed data in a distributed database; and providing access to the processed data through a user interface, wherein the user interface allows for dynamic querying and visualization of the processed data."  
+
     **Proposed Amended Language:**  
-    "A communication system comprising a transmitter and receiver, wherein the transmitter is configured to utilize an adaptive frequency hopping protocol to dynamically adjust communication channels based on interference levels."  
+    "A method for processing data in a distributed computing environment, the method comprising: receiving data from a plurality of data sources; aggregating the received data based on predefined criteria; applying a set of transformation algorithms to the aggregated data to generate processed data; storing the processed data in a distributed database; and providing access to the processed data through a user interface, wherein the user interface allows for dynamic querying and visualization of the processed data `<u>`in real-time`</u>`."  
+
     **Derivation and Reasoning:**  
-    - **Source Reference:** Derived from Paragraphs [0040]-[0045] and Figures 4A-4D of the application.  
-    - **Reasoning:** The amendment specifies the use of an "adaptive frequency hopping protocol" and includes dynamic adjustments based on interference levels, adding specificity and distinguishing over prior art that lacks adaptive frequency hopping.  
+    - **Source Reference:** Derived from Paragraphs [0050]-[0060] and Figures 5A-5C of the application.  
+    - **Reasoning:** The amendment specifies real-time capabilities of the user interface, adding specificity and distinguishing over prior art that does not support real-time data interaction.  
+
     **Supporting Arguments:**  
-    - **Novelty:** The cited reference does not disclose a communication system utilizing an adaptive frequency hopping protocol that adjusts based on interference levels.  
-    - **Non-Obviousness:** Combining a communication system with an adaptive frequency hopping protocol introduces an unexpected technical advantage by improving communication reliability and reducing interference, which is not suggested or rendered obvious by the prior art.  
-    - **Technical Advantages:** Enhances communication reliability and reduces interference, as detailed in Paragraph [0046] of the application.  
-    - **Addressing Examiner's Rejection:** The prior art only teaches static frequency selection methods, thus the amendment overcomes the rejection by introducing adaptive frequency hopping functionality not suggested in the cited reference.  
-    """  
-  
+    - **Novelty:** The cited reference does not disclose a user interface that allows for real-time querying and visualization of processed data.  
+    - **Non-Obviousness:** Introducing real-time capabilities involves technical challenges and provides significant advantages, which are not suggested by the prior art.  
+    - **Technical Advantages:** Improves user experience and decision-making speed, as detailed in Paragraph [0065] of the application.  
+    - **Addressing Examiner's Rejection:** The prior art lacks discussion of real-time data interaction, thus the amendment overcomes the rejection by introducing this novel feature.  
+    """ 
+      
     text_a = """  
     **Example Analysis**  
     **Key Features of Independent Claim 1**  
@@ -887,10 +889,14 @@ def generate_few_shot_examples():
 def generate_formatting_rules():  
     """Generate formatting rules for the analysis."""  
     return """  
-    IMPORTANT FORMATTING RULES:  
+IMPORTANT FORMATTING RULES:  
+
+- **Include the Entire Original Claim:**  
+    - Always include the full text of the Original Claim Language without any omissions, summaries, or paraphrasing.  
+    - Do not shorten or condense the claim, even if it is lengthy.  
 
 - **Bold Formatting:**  
-  - **Bold all headings and subheadings**, including any labels such as "Original Claim Language," "Proposed Amended Language," "Derivation and Reasoning," "- Source Reference," and "- Reasoning."  
+    - **Bold all headings and subheadings**, including any labels such as "Original Claim Language," "Proposed Amended Language," "Derivation and Reasoning," "- Source Reference," and "- Reasoning."  
 
 - **Underlining New Language:**  
   - Underline new language in the 'Proposed Amended Language' by enclosing it within '<u>' and '</u>' tags.  
@@ -909,8 +915,6 @@ def generate_formatting_rules():
 - **Consistency:**  
   - Maintain consistent formatting throughout the document.  
   - Do not include placeholder text like "N/A" or enclose words within asterisks unless indicating bold text.  
-
-
 """  
   
 def generate_analysis_prompt(extracted_details, foundational_claim, dependent_claim, figure_analysis):  
@@ -925,9 +929,11 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
     {json.dumps(figure_analysis, indent=2)}  
     and the application as filed details:  
     {extracted_details}  
-      
+    
+    Please Extract full original text of the foundational claim from the Application as Filed, ensuring it is copied verbatim without any omissions, alterations, or summaries, regardless of its length. and store it as "Original Claim Language" for later use.    
+    
     {formatting_rules}  
-      
+    
     Key Features of Independent Claim with Number:  
     Extract and list the key features of the foundational claim. Ensure to include structural details, functional aspects, and any specific configurations mentioned in the claim.  
   
@@ -948,65 +954,59 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
   
     Potential Areas for Distinction:  
     Identify areas where the foundational claim can be distinguished from the cited reference. Focus on unique structural features, specific materials, configurations, or functions not disclosed in the cited reference.  
-  
+         
     Proposed Amendments and Arguments:  
-        1. Identify Key Feature Points:
-        - Carefully read the foundational claim of the patent application as filed and Identify at least 2-3 key feature points that are essential to the claim.
-        - Break down the claim into individual key feature points for clarity.  
+    1. Identify Key Feature Points:
+    - Carefully read the foundational claim of the patent application as filed and Identify at least 2-3 key feature points that are essential to the claim.
+    - Break down the claim into individual key feature points for clarity.  
 
-        2. Propose Multiple Specific Amendments for Each Key Feature Point:
-        - For **each** key feature point identified, propose 2-3 different amendments aimed at improving the claim.
-        - Amendments may include:  
-            - Clarifying ambiguous or broad language.  
-            - Refining the claim scope to better distinguish over prior art.  
-            - Correcting errors or inconsistencies.  
-            - Enhancing the claim's precision and specificity.  
-            - Reorganizing claim elements for better logical flow.  
-        - Ensure that all proposed amendments are fully supported by the original disclosure from application as filed.  
-        - It is mandatory to propose an amendment for every key feature point. 
+    2. Propose Multiple Specific Amendments for Each Key Feature Point:
+    - For **each** key feature point identified, propose 2-3 different amendments aimed at improving the claim and use the same Original Claim.
+    - Amendments may include:  
+        - Clarifying ambiguous or broad language.  
+        - Refining the claim scope to better distinguish over prior art.  
+        - Correcting errors or inconsistencies.  
+        - Enhancing the claim's precision and specificity.  
+        - Reorganizing claim elements for better logical flow.  
+    - Ensure that all proposed amendments are fully supported by the original disclosure from application as filed.  
 
-        3. Check for Consistency with Dependent Claims:  
-        - Review all dependent claims to ensure that your proposed amendments to the foundational claim do not create conflicts or inconsistencies.  
-        - If a conflict arises, adjust the amendment or suggest corresponding changes to dependent claims to maintain consistency within the claim set.  
+    3. Check for Consistency with Dependent Claims:  
+    - Review all dependent claims to ensure that your proposed amendments to the foundational claim do not create conflicts or inconsistencies.  
+    - If a conflict arises, adjust the amendment or suggest corresponding changes to dependent claims to maintain consistency within the claim set.  
 
-        4. Present Original and Amended Versions:  
-        - For each key feature point, present both the **original claim language** and the **proposed amended language**.  
-        - Important: **Underline** the new or modified language by enclosing it within `<u>` and `</u>` tags.  
-        - The amendments should not be restricted to introducing new features, specific materials, or configurations. Consider all types of improvements that enhance the claim while staying within the original disclosure.  
+    4. Present Original and Amended Versions:  
+    - For each key feature point, present both the **original claim language** and the **proposed amended language**.  
+    - Important: **Underline** the new or modified language by enclosing it within `<u>` and `</u>` tags.  
+    - The amendments should not be restricted to introducing new features, specific materials, or configurations. Consider all types of improvements that enhance the claim while staying within the original disclosure.  
 
-        5. Sample Examples:
-            *Examples:*  
-            - **Feature Point 1 (Process Step Clarification):**  
-            - *Original Claim Language:* "A method comprising mixing substances A and B."  
-            - *Proposed Amended Language:* "A method comprising mixing substances A and B `<u>`at a ratio of 1:1`</u>`." 
-            - *Source Reference:* "Derived from Paragraph [0014]-[0018] of the application, which describes the specific configuration `<u>`at a ratio of 1:1`</u>`..." or "Supported by Figure 4, illustrating the component layout..." 
+    5. Sample Examples:
+        *Examples:*  
+        - **Feature Point 1 (Process Step Clarification):**  
+        - *Original Claim Language:* "A method comprising mixing substances A and B."  
+        - *Proposed Amended Language:* "A method comprising mixing substances A and B `<u>`at a ratio of 1:1`</u>`." 
+        - *Source Reference:* "Derived from Paragraph [0014]-[0018] of the application, which describes the specific configuration `<u>`at a ratio of 1:1`</u>`..." or "Supported by Figure 4, illustrating the component layout..." 
 
-            - **Feature Point 2 (Element Specification):**  
-            - *Original Claim Language:* "An apparatus having a display."  
-            - *Proposed Amended Language:* "An apparatus having a `<u>`touch-sensitive`</u>` display."  
-            - *Source Reference:* "Derived from Paragraph [0029] and [0032] of the application, which describes the specific configuration `<u>`touch-sensitive`</u>`..." or "Supported by Figure 3, illustrating the component layout..." 
-            
-            - **Feature Point 3 (Functional Improvement):**  
-            - *Original Claim Language:* "The system processes data received from a sensor."  
-            - *Proposed Amended Language:* "The system `<u>`analyzes and filters`</u>` data received from a sensor."  
-            - *Source Reference:* "Derived from Paragraph [0057] of the application, which describes the specific configuration `<u>`analyzes and filters`</u>`..." or "Supported by Figure 3, illustrating the component layout..." 
+        - **Feature Point 2 (Element Specification):**  
+        - *Original Claim Language:* "An apparatus having a display."  
+        - *Proposed Amended Language:* "An apparatus having a `<u>`touch-sensitive`</u>` display."  
+        - *Source Reference:* "Derived from Paragraph [0029] and [0032] of the application, which describes the specific configuration `<u>`touch-sensitive`</u>`..." or "Supported by Figure 3, illustrating the component layout..." 
+        
+    6. Final Review:  
+    - Ensure that all proposed amendments collectively improve the claim without introducing new matter or exceeding the original disclosure from application as filed.  
+    - Verify that the amended language is clear, precise, and adheres to patent drafting standards.  
+    - Confirm that the claim remains fully supported by the description, drawings, and any other parts of the application as filed.  
+    ---  
+    Notes: 
+    - **Mandatory Amendments:** An amendment must be proposed for every key feature point in the foundational claim.  
+    - **Support from Original Application:** All amendments must be based on the content of the patent application as filed; new matter cannot be introduced.  
+    - **Scope of Amendments:** Proposed amendments are not restricted to introducing new features, specific materials, or configurations. They may include clarifications, refinements, corrections, or structural improvements that enhance the clarity and enforceability of the claim.  
+    - **Conflict Avoidance:** Amendments should not create conflicts with dependent claims. If necessary, suggest corresponding amendments to dependent claims to maintain consistency across the claim set.  
+    ---   
 
-        6. Final Review:  
-        - Ensure that all proposed amendments collectively improve the claim without introducing new matter or exceeding the original disclosure from application as filed.  
-        - Verify that the amended language is clear, precise, and adheres to patent drafting standards.  
-        - Confirm that the claim remains fully supported by the description, drawings, and any other parts of the application as filed.  
-        ---  
-        Notes: 
-        - **Mandatory Amendments:** An amendment must be proposed for every key feature point in the foundational claim.  
-        - **Support from Original Application:** All amendments must be based on the content of the patent application as originally filed; new matter cannot be introduced.  
-        - **Scope of Amendments:** Proposed amendments are not restricted to introducing new features, specific materials, or configurations. They may include clarifications, refinements, corrections, or structural improvements that enhance the clarity and enforceability of the claim.  
-        - **Conflict Avoidance:** Amendments should not create conflicts with dependent claims. If necessary, suggest corresponding amendments to dependent claims to maintain consistency across the claim set.  
-        --- 
-      
     Format for Each Amendment:  
     Amendment [Number]: [Feature Title]  
     Original Claim Language: 
-    "[Please extract the exact full original text of foundational claim from only application as Filed, ensuring that it is copied verbatim without any omissions or alterations.]"
+    "[Please include the exact full original text of the foundational claim from the Application as Filed, ensuring it is copied verbatim without any omissions, alterations, or summaries, regardless of its length.]"
     
     Proposed Amended Language:  
     "[Insert the enhanced feature description, incorporating new details, specific materials, or configurations. Only use the content from Application as Filed when proposing Amendments. **Underline** the new language proposed by enclosing it within '<u>' and '</u>' tags.]"  
@@ -1019,6 +1019,7 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
     Explain why the amendment was made, detailing how it enhances specificity, overcomes prior art, or adds technical advantages. Highlight any differences from the cited references. Emphasize any technical advantages or improvements introduced by the amendments.  
     Provide arguments supporting novelty and non-obviousness over the cited reference.
     Emphasize any technical advantages or improvements introduced by the amendments.   
+
     """  
   
 def format_analysis_output(response_content):  
@@ -1059,10 +1060,25 @@ def analyze_filed_application(extracted_details, foundational_claim, dependent_c
     for attempt in range(max_attempts):  
         try:  
             response = client.chat.completions.create(  
-                model="GPT-4-Omni", messages=messages, temperature=0.2  
+                model="GPT-4-Omni", messages=messages, temperature=0.2, max_tokens=8192  
             )  
-            analysis_output = response.choices[0].message.content.strip()  
-            return format_analysis_output(analysis_output)  
+            # analysis_output = response.choices[0].message.content.strip()  
+            # return format_analysis_output(analysis_output)  
+
+            analysis_output = response.choices[0].message.content.strip()
+            
+            print("------------------------------------------------------------------------------------------------------")
+            print(analysis_output)
+            print("------------------------------------------------------------------------------------------------------")
+            
+            start_phrase = "**Key Features of Independent"
+            if start_phrase in analysis_output:
+                analysis_output = analysis_output.split(start_phrase, 1)[-1]
+                analysis_output = f"{start_phrase}{analysis_output.strip()}"  # Ensure the phrase is included in the final output
+            else:
+                analysis_output = analysis_output
+
+            return format_analysis_output(analysis_output)
   
         except Exception as e:  
             if attempt == max_attempts - 1:  
@@ -1252,9 +1268,6 @@ def analyze_modified_application(filed_app_details_json, cited_references_text, 
     ]  
       
     try:  
-        print("---------------------------------------------------------------------------------------------------------------------------------")
-        print(f"foundational claim:{json.dumps(foundational_claim, indent=2)} from Application as Filed:{json.dumps(filed_app_details_json, indent=2)}")
-        print("---------------------------------------------------------------------------------------------------------------------------------")
 
         response = client.chat.completions.create(  
             model="GPT-4-Omni", messages=messages, temperature=0.6  
@@ -1699,7 +1712,7 @@ with st.expander("Step 1: Office Action", expanded=True):
                         # Determine domain expertise using the summarized text  
                         domain, expertise, style = determine_domain_expertise(summarized_text)  
                         if not (domain and expertise and style):  
-                            st.error("Failed to determine domain expertise.")  
+                            st.error("Failed Passing Request, Please try again!.")  
                         else:  
                             st.session_state.domain = domain  
                             st.session_state.expertise = expertise  
@@ -1919,9 +1932,6 @@ if st.session_state.get("figure_analysis") is not None:
                                 st.session_state.expertise,  
                                 st.session_state.style  
                             )    
-                            print("---------------------------------------------------------------------------------------------------------------------------------")
-                            print(f"foundational claim:{json.dumps(st.session_state.foundational_claim, indent=2)} from Application as Filed:{processed_filed_app_text}")
-                            print("---------------------------------------------------------------------------------------------------------------------------------")
         
                             if analysis_results:  
                                 st.session_state.filed_application_analysis = analysis_results  
