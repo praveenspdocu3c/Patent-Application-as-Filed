@@ -916,9 +916,13 @@ IMPORTANT FORMATTING RULES:
   - Maintain consistent formatting throughout the document.  
   - Do not include placeholder text like "N/A" or enclose words within asterisks unless indicating bold text.  
 """  
+
+
+
+
   
 def generate_analysis_prompt(extracted_details, foundational_claim, dependent_claim, figure_analysis):  
-    """Generate the user prompt for analyzing the filed application."""  
+    
     formatting_rules = generate_formatting_rules()  
     return f"""  
     Analyze the filed application based on the foundational claim:  
@@ -927,7 +931,7 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
     {json.dumps(dependent_claim, indent=2)}
     and the figure analysis results:  
     {json.dumps(figure_analysis, indent=2)}  
-    and the application as filed details:  
+    and the Application as filed details:  
     {extracted_details}  
     
     Please Extract full original text of the foundational claim from the Application as Filed, ensuring it is copied verbatim without any omissions, alterations, or summaries, regardless of its length. and store it as "Original Claim Language" for later use.    
@@ -957,7 +961,7 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
          
     Proposed Amendments and Arguments:  
     1. Identify Key Feature Points:
-    - Carefully read the foundational claim of the patent application as filed and Identify at least 2-3 key feature points that are essential to the claim.
+    - Carefully read the foundational claim of the patent Application as filed and Identify at least 2-3 key feature points that are essential to the claim.
     - Break down the claim into individual key feature points for clarity.  
 
     2. Propose Multiple Specific Amendments for Each Key Feature Point:
@@ -968,7 +972,7 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
         - Correcting errors or inconsistencies.  
         - Enhancing the claim's precision and specificity.  
         - Reorganizing claim elements for better logical flow.  
-    - Ensure that all proposed amendments are fully supported by the original disclosure from application as filed.  
+    - Important: Ensure that all proposed amendments are fully created from Application as filed only.  
 
     3. Check for Consistency with Dependent Claims:  
     - Review all dependent claims to ensure that your proposed amendments to the foundational claim do not create conflicts or inconsistencies.  
@@ -977,9 +981,16 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
     4. Present Original and Amended Versions:  
     - For each key feature point, present both the **original claim language** and the **proposed amended language**.  
     - Important: **Underline** the new or modified language by enclosing it within `<u>` and `</u>` tags.  
-    - The amendments should not be restricted to introducing new features, specific materials, or configurations. Consider all types of improvements that enhance the claim while staying within the original disclosure.  
+    (Important: Note the Source Reference Paragraph number of the new or modified language that is enclosed within <u> and </u> tags for later use.)
 
-    5. Sample Examples:
+    5. Source Reference:
+        - Ensure that all proposed amendments `<u>` Mentioned Content `</u>` tags are fully created from the Application as filed only.
+        - Source Reference: Describe whether any of the content in Application as filed can be inferred to Proposed Amended the new or modified language by enclosing it within `<u>` and `</u>` tags. If yes then give me paragraph number that describes it, else change the Proposed Amended.
+        For example,
+            - Source Reference: "Derived from Paragraph [0032]-[0035] of the application, which describes the specific configuration..." or "Supported by Figure 4, illustrating the component layout..."
+            - Source Reference: "Derived from Paragraph [0018] and [0044] of the application, which describes the specific configuration..." or "Supported by Figure 2, illustrating the component layout..."
+    
+    6. Sample Examples:
         *Examples:*  
         - **Feature Point 1 (Process Step Clarification):**  
         - *Original Claim Language:* "A method comprising mixing substances A and B."  
@@ -991,14 +1002,14 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
         - *Proposed Amended Language:* "An apparatus having a `<u>`touch-sensitive`</u>` display."  
         - *Source Reference:* "Derived from Paragraph [0029] and [0032] of the application, which describes the specific configuration `<u>`touch-sensitive`</u>`..." or "Supported by Figure 3, illustrating the component layout..." 
         
-    6. Final Review:  
-    - Ensure that all proposed amendments collectively improve the claim without introducing new matter or exceeding the original disclosure from application as filed.  
+    7. Final Review:  
+    - Ensure that all proposed amendments collectively improve the claim without introducing new matter or exceeding the original disclosure from Application as filed.  
     - Verify that the amended language is clear, precise, and adheres to patent drafting standards.  
-    - Confirm that the claim remains fully supported by the description, drawings, and any other parts of the application as filed.  
+    - Confirm that the claim remains fully supported by the description, drawings, and any other parts of the Application as filed.  
     ---  
     Notes: 
     - **Mandatory Amendments:** An amendment must be proposed for every key feature point in the foundational claim.  
-    - **Support from Original Application:** All amendments must be based on the content of the patent application as filed; new matter cannot be introduced.  
+    - **Support from Original Application:** All amendments must be based on the content of the patent Application as filed; new matter cannot be introduced.  
     - **Scope of Amendments:** Proposed amendments are not restricted to introducing new features, specific materials, or configurations. They may include clarifications, refinements, corrections, or structural improvements that enhance the clarity and enforceability of the claim.  
     - **Conflict Avoidance:** Amendments should not create conflicts with dependent claims. If necessary, suggest corresponding amendments to dependent claims to maintain consistency across the claim set.  
     ---   
@@ -1012,14 +1023,13 @@ def generate_analysis_prompt(extracted_details, foundational_claim, dependent_cl
     "[Insert the enhanced feature description, incorporating new details, specific materials, or configurations. Only use the content from Application as Filed when proposing Amendments. **Underline** the new language proposed by enclosing it within '<u>' and '</u>' tags.]"  
     
     Derivation of Amendment:  
-    Source Reference: Carefully cite the exact sections, paragraphs, figures, or embodiments from the Application as Filed that directly support the amendment. Ensure the citations accurately correspond to the content used in the amendment. 
+    Source Reference: Describe whether any of the content in Application as filed can be inferred to Proposed Amended the new or modified language by enclosing it within `<u>` and `</u>` tags. If yes then give me paragraph number that describes it, else change the Proposed Amended.
     Source Reference: For example, "Derived from Paragraph [0032] of the application, which describes the specific configuration..." or "Supported by Figure 4, illustrating the component layout..."
-    Verification Step: Before finalizing, cross-check all source references to ensure they match the provided Application as Filed content.
     Reasoning: 
     Explain why the amendment was made, detailing how it enhances specificity, overcomes prior art, or adds technical advantages. Highlight any differences from the cited references. Emphasize any technical advantages or improvements introduced by the amendments.  
     Provide arguments supporting novelty and non-obviousness over the cited reference.
     Emphasize any technical advantages or improvements introduced by the amendments.   
-
+    
     """  
   
 def format_analysis_output(response_content):  
@@ -1060,7 +1070,7 @@ def analyze_filed_application(extracted_details, foundational_claim, dependent_c
     for attempt in range(max_attempts):  
         try:  
             response = client.chat.completions.create(  
-                model="GPT-4-Omni", messages=messages, temperature=0.7, max_tokens=8192  
+                model="GPT-4-Omni", messages=messages, temperature=0.3, max_tokens=8192  
             )  
             # analysis_output = response.choices[0].message.content.strip()  
             # return format_analysis_output(analysis_output)  
@@ -1090,6 +1100,214 @@ def analyze_filed_application(extracted_details, foundational_claim, dependent_c
             logging.warning(f"Retrying in {jitter:.2f} seconds (attempt {attempt + 1}) due to error: {e}")  
             time.sleep(jitter) 
   
+# def parse_amendments_output(amendments_output):  
+
+#     import re  
+      
+#     # Split the output based on "Amendment" headings  
+#     amendment_sections = re.split(r"Amendment \d+:", amendments_output)  
+#     amendments = []  
+      
+#     for section in amendment_sections[1:]:  
+#         # Extract details using regular expressions  
+#         original_claim_match = re.search(r"Original Claim Language:\n(.+?)\nProposed Amended Language:", section, re.DOTALL)  
+#         proposed_amendment_match = re.search(r"Proposed Amended Language:\n(.+?)\nDerivation of Amendment:", section, re.DOTALL)  
+#         source_reference_match = re.search(r"Source Reference:\n(.+?)\nReasoning:", section, re.DOTALL)  
+          
+#         amendment = {  
+#             "Original Claim Language": original_claim_match.group(1).strip() if original_claim_match else "",  
+#             "Proposed Amended Language": proposed_amendment_match.group(1).strip() if proposed_amendment_match else "",  
+#             "Source Reference": source_reference_match.group(1).strip() if source_reference_match else "",  
+#         }  
+#         amendments.append(amendment)  
+      
+#     return amendments 
+
+# def extract_source_content(application_text, source_reference):  
+#     """  
+#     Extracts the content from the application text based on the source reference.  
+#     Parameters:  
+#         application_text (str): The text of the application as filed.  
+#         source_reference (str): The source reference provided by the LLM.  
+#     Returns:  
+#         referenced_content (str): The extracted content from the application.  
+#     """  
+#     import re  
+      
+#     # Example: Extract paragraphs based on reference like "Paragraphs [0032]-[0034]"  
+#     paragraph_matches = re.findall(r"Paragraph\s*\[?(\d+)\]?", source_reference)  
+#     referenced_content = ""  
+      
+#     for para_num in paragraph_matches:  
+#         pattern = rf"(\[{para_num}\].+?)(\[\d+\]|$)"  # Matches the paragraph with the given number  
+#         match = re.search(pattern, application_text, re.DOTALL)  
+#         if match:  
+#             referenced_content += match.group(1)        
+#     return referenced_content 
+
+# def validate_amendment_with_source(proposed_amendment, referenced_content):  
+#     """  
+#     Validates if the proposed amendment is supported by the referenced content.  
+#     Parameters:  
+#         proposed_amendment (str): The proposed amendment text.  
+#         referenced_content (str): The content extracted from the application.       
+#     Returns:  
+#         is_valid (bool): True if the amendment is supported, False otherwise.  
+#     """  
+#     from difflib import SequenceMatcher  
+      
+#     # Remove underlining tags from proposed amendment  
+#     cleaned_amendment = re.sub(r"</?u>", "", proposed_amendment)  
+      
+#     # Check if the cleaned amendment text is approximately present in the referenced content  
+#     sequence_matcher = SequenceMatcher(None, cleaned_amendment.lower(), referenced_content.lower())  
+#     similarity_ratio = sequence_matcher.ratio()  
+      
+#     # Define a threshold for validation, e.g., 0.7 for 70% similarity  
+#     threshold = 0.5  
+#     is_valid = similarity_ratio >= threshold  
+      
+#     return is_valid 
+
+
+
+# import re  
+  
+# def extract_references(text):  
+#     # Extract paragraph numbers enclosed in square brackets  
+#     paragraphs = re.findall(r'\[([0-9]+)\]', text)  
+#     # Extract figure numbers mentioned as Figure or Figures  
+#     figures = re.findall(r'Figure[s]? (\d+)', text)  
+#     return set(paragraphs), set(figures)  
+  
+# def correct_amendment_references(amendment, application_field):  
+#     # Extract references from the amendment and application as field text  
+#     st.write(amendment)
+    
+#     amendment_paragraphs, amendment_figures = extract_references(amendment)  
+#     application_paragraphs, application_figures = extract_references(application_field)  
+      
+#     # Find the discrepancies  
+#     missing_paragraphs = application_paragraphs - amendment_paragraphs  
+#     missing_figures = application_figures - amendment_figures  
+      
+#     # Prepare the corrected amendment reference  
+#     corrected_amendment = amendment  
+#     if missing_paragraphs or missing_figures:  
+#         # Construct the new reference part  
+#         new_reference = []  
+#         if application_paragraphs:  
+#             new_reference.append("Paragraph " + ', '.join(f'[{p}]' for p in sorted(application_paragraphs)))  
+#         if application_figures:  
+#             new_reference.append("Figures " + ', '.join(sorted(application_figures)))  
+#         new_reference_text = ' and '.join(new_reference)  
+          
+#         # Replace the old reference with the corrected one  
+#         corrected_amendment = re.sub(r'Source Reference: .*?\. ', f'Source Reference: {new_reference_text}. ', amendment)  
+      
+#     return corrected_amendment  
+  
+# # Example texts  
+# amendment_text = "Source Reference: Supported by Paragraph [0049] and Figures 4-6, describing the dynamic adjustment capabilities of the pump."  
+# application_field_text = "Source Reference: Supported by Paragraph [0044] , [0049] and Figures 4, describing the dynamic adjustment capabilities of the pump."  
+  
+# Correcting the amendment references  
+# corrected_amendment = correct_amendment_references(amendment_text, application_field_text)  
+# print(corrected_amendment)  
+
+
+import re  
+from difflib import SequenceMatcher  
+  
+def parse_amendments_output(amendments_output):  
+    # Split the output based on "Amendment" headings  
+    amendment_sections = re.split(r"Amendment \d+:", amendments_output)  
+    amendments = []  
+  
+    for section in amendment_sections[1:]:  
+        # Extract details using regular expressions  
+        original_claim_match = re.search(r"Original Claim Language::\n?\"(.+?)\"\n?Proposed Amended Language::", section, re.DOTALL)  
+        proposed_amendment_match = re.search(r"Proposed Amended Language::\n?\"(.+?)\"\n?Derivation of Amendment::", section, re.DOTALL)  
+        source_reference_match = re.search(r"Source Reference: (.+?)\nReasoning:", section, re.DOTALL)  
+  
+        amendment = {  
+            "Original Claim Language": original_claim_match.group(1).strip() if original_claim_match else "",  
+            "Proposed Amended Language": proposed_amendment_match.group(1).strip() if proposed_amendment_match else "",  
+            "Source Reference": source_reference_match.group(1).strip() if source_reference_match else "",  
+        }  
+        amendments.append(amendment)  
+  
+    return amendments  
+  
+def extract_source_content(application_text, source_reference):  
+    # Example: Extract paragraphs based on reference like "Paragraphs [0032]-[0034]"  
+    paragraph_matches = re.findall(r"Paragraph\s*\[?(\d+)\]?", source_reference)  
+    referenced_content = ""  
+  
+    for para_num in paragraph_matches:  
+        pattern = rf"(\[{para_num}\].+?)(\[\d+\]|$)"  # Matches the paragraph with the given number  
+        match = re.search(pattern, application_text, re.DOTALL)  
+        if match:  
+            referenced_content += match.group(1)  
+  
+    return referenced_content  
+  
+def validate_amendment_with_source(proposed_amendment, referenced_content):  
+    # Remove underlining tags from proposed amendment  
+    cleaned_amendment = re.sub(r"</?u>", "", proposed_amendment)  
+  
+    # Check if the cleaned amendment text is approximately present in the referenced content  
+    sequence_matcher = SequenceMatcher(None, cleaned_amendment.lower(), referenced_content.lower())  
+    similarity_ratio = sequence_matcher.ratio()  
+  
+    # Define a threshold for validation, e.g., 0.5 for 50% similarity  
+    threshold = 0.7  
+    is_valid = similarity_ratio >= threshold  
+  
+    return is_valid  
+
+
+
+
+def prompt_llm_to_correct_amendments(amendments_output, application_text):  
+    """  
+    Prompts the LLM to correct the source references in the amendments.        
+    Parameters:  
+        amendments_output (str): The current amendments output from the LLM.  
+        application_text (str): The text of the application as filed.  
+    Returns:  
+        corrected_amendments_output (str): The LLM's corrected amendments output.  
+    """  
+    
+    st.success("Source References verification is completed")
+    correction_prompt = f"""
+    Only alter the source references Paragraph's and Figure and return other data of Current Amendments,
+    The source references in the proposed amendments do not accurately cite the supporting content from the application as filed. Please review each amendment and ensure that all source references correctly correspond to the content used in the amendments. Use exact paragraph numbers, figure numbers, and sections as present in the application text provided.  
+    If the source references Paragraph's and Figure is correct then return the Current Amendments exactly as it is.
+  
+    Application Text:  
+    {application_text}  
+  
+    Current Amendments:  
+    {amendments_output}  
+  
+    Please provide corrected amendments with accurate source references.  
+    Remember only alter the source references Paragraph's and Figure and return other data of Current Amendments in the exact same format.
+    """  
+    
+
+    # Call the LLM with the correction prompt  
+    response = client.chat.completions.create(  
+        model="GPT-4-Omni",  
+        messages=[  
+            {"role": "system", "content": "You are an AI assistant helping to correct source references in patent amendments."},  
+            {"role": "user", "content": correction_prompt}  
+        ],  
+        temperature=0,  
+    )  
+      
+    corrected_amendments_output = response.choices[0].message.content.strip()  
+    return corrected_amendments_output  
 
 def analyze_modified_application(filed_app_details_json, cited_references_text, foundational_claim, dependent_claim, figure_analysis, modified_application_details, domain, expertise, style): 
     content = f"""
@@ -1160,77 +1378,76 @@ def analyze_modified_application(filed_app_details_json, cited_references_text, 
     Focus on unique structural features, specific materials, configurations, or functions not disclosed in the cited reference.
 
     Proposed Amendments and Arguments:  
-        1. Identify Key Feature Points:
-        - Carefully read the foundational claim of the patent application as filed.  
-        - Break down the claim into individual key feature points for clarity.  
+    1. Identify Key Feature Points:
+    - Carefully read the foundational claim of the patent Application as filed and Identify at least 2-3 key feature points that are essential to the claim.
+    - Break down the claim into individual key feature points for clarity.  
 
-        2. Propose Specific Amendments:
-        - For **each** key feature point identified, propose a specific amendment aimed at improving the claim.  
-        - Amendments may include:  
-            - Clarifying ambiguous or broad language.  
-            - Refining the claim scope to better distinguish over prior art.  
-            - Correcting errors or inconsistencies.  
-            - Enhancing the claim's precision and specificity.  
-            - Reorganizing claim elements for better logical flow.  
-        - Ensure that all proposed amendments are fully supported by the original disclosure in the patent application as filed.  
-        - **It is mandatory to propose an amendment for every key feature point.**  
+    2. Propose Multiple Specific Amendments for Each Key Feature Point:
+    - For **each** key feature point identified, propose 2-3 different amendments aimed at improving the claim and use the same Original Claim.
+    - Amendments may include:  
+        - Clarifying ambiguous or broad language.  
+        - Refining the claim scope to better distinguish over prior art.  
+        - Correcting errors or inconsistencies.  
+        - Enhancing the claim's precision and specificity.  
+        - Reorganizing claim elements for better logical flow.  
+    - Important: Ensure that all proposed amendments are fully created from Application as filed only.  
 
-        3. Check for Consistency with Dependent Claims:  
-        - Review all dependent claims to ensure that your proposed amendments to the foundational claim do not create conflicts or inconsistencies.  
-        - If a conflict arises, adjust the amendment or suggest corresponding changes to dependent claims to maintain consistency within the claim set.  
+    3. Check for Consistency with Dependent Claims:  
+    - Review all dependent claims to ensure that your proposed amendments to the foundational claim do not create conflicts or inconsistencies.  
+    - If a conflict arises, adjust the amendment or suggest corresponding changes to dependent claims to maintain consistency within the claim set.  
 
-        4. Present Original and Amended Versions:  
-        - For each key feature point, present both the **original claim language** and the **proposed amended language**.  
-        - **Underline** the new or modified language by enclosing it within `<u>` and `</u>` tags.  
-        - The amendments should not be restricted to introducing new features, specific materials, or configurations. Consider all types of improvements that enhance the claim while staying within the original disclosure.  
+    4. Present Original and Amended Versions:  
+    - For each key feature point, present both the **original claim language** and the **proposed amended language**.  
+    - Important: **Underline** the new or modified language by enclosing it within `<u>` and `</u>` tags.  
+    (Important: Note the Source Reference Paragraph number of the new or modified language that is enclosed within <u> and </u> tags for later use.)
 
-        5. Sample Examples:
-            *Examples:*  
-            - **Feature Point 1 (Process Step Clarification):**  
-            - *Original Claim Language:* "A method comprising mixing substances A and B."  
-            - *Proposed Amended Language:* "A method comprising mixing substances A and B `<u>`at a ratio of 1:1`</u>`."  
+    5. Source Reference:
+        - Ensure that all proposed amendments `<u>` Mentioned Content `</u>` tags are fully created from the Application as filed only.
+        - Source Reference: Describe whether any of the content in Application as filed can be inferred to Proposed Amended the new or modified language by enclosing it within `<u>` and `</u>` tags. If yes then give me paragraph number that describes it, else change the Proposed Amended.
+        For example,
+            - Source Reference: "Derived from Paragraph [0032]-[0035] of the application, which describes the specific configuration..." or "Supported by Figure 4, illustrating the component layout..."
+            - Source Reference: "Derived from Paragraph [0018] and [0044] of the application, which describes the specific configuration..." or "Supported by Figure 2, illustrating the component layout..."
+    
+    6. Sample Examples:
+        *Examples:*  
+        - **Feature Point 1 (Process Step Clarification):**  
+        - *Original Claim Language:* "A method comprising mixing substances A and B."  
+        - *Proposed Amended Language:* "A method comprising mixing substances A and B `<u>`at a ratio of 1:1`</u>`." 
+        - *Source Reference:* "Derived from Paragraph [0014]-[0018] of the application, which describes the specific configuration `<u>`at a ratio of 1:1`</u>`..." or "Supported by Figure 4, illustrating the component layout..." 
 
-            - **Feature Point 2 (Element Specification):**  
-            - *Original Claim Language:* "An apparatus having a display."  
-            - *Proposed Amended Language:* "An apparatus having a `<u>`touch-sensitive`</u>` display."  
+        - **Feature Point 2 (Element Specification):**  
+        - *Original Claim Language:* "An apparatus having a display."  
+        - *Proposed Amended Language:* "An apparatus having a `<u>`touch-sensitive`</u>` display."  
+        - *Source Reference:* "Derived from Paragraph [0029] and [0032] of the application, which describes the specific configuration `<u>`touch-sensitive`</u>`..." or "Supported by Figure 3, illustrating the component layout..." 
+        
+    7. Final Review:  
+    - Ensure that all proposed amendments collectively improve the claim without introducing new matter or exceeding the original disclosure from Application as filed.  
+    - Verify that the amended language is clear, precise, and adheres to patent drafting standards.  
+    - Confirm that the claim remains fully supported by the description, drawings, and any other parts of the Application as filed.  
+    ---  
+    Notes: 
+    - **Mandatory Amendments:** An amendment must be proposed for every key feature point in the foundational claim.  
+    - **Support from Original Application:** All amendments must be based on the content of the patent Application as filed; new matter cannot be introduced.  
+    - **Scope of Amendments:** Proposed amendments are not restricted to introducing new features, specific materials, or configurations. They may include clarifications, refinements, corrections, or structural improvements that enhance the clarity and enforceability of the claim.  
+    - **Conflict Avoidance:** Amendments should not create conflicts with dependent claims. If necessary, suggest corresponding amendments to dependent claims to maintain consistency across the claim set.  
+    ---   
 
-            - **Feature Point 3 (Functional Improvement):**  
-            - *Original Claim Language:* "The system processes data received from a sensor."  
-            - *Proposed Amended Language:* "The system `<u>`analyzes and filters`</u>` data received from a sensor."  
-
-            - **Feature Point 4 (Structural Adjustment):**  
-            - *Original Claim Language:* "A device comprising components X, Y, and Z."  
-            - *Proposed Amended Language:* "A device comprising `<u>`components X and Y interconnected with component Z`</u>`."  
-
-        6. Final Review:  
-        - Ensure that all proposed amendments collectively improve the claim without introducing new matter or exceeding the original disclosure from application as filed.  
-        - Verify that the amended language is clear, precise, and adheres to patent drafting standards.  
-        - Confirm that the claim remains fully supported by the description, drawings, and any other parts of the application as filed.  
-        ---  
-        Notes: 
-        - **Mandatory Amendments:** An amendment must be proposed for every key feature point in the foundational claim.  
-        - **Support from Original Application:** All amendments must be based on the content of the patent application as originally filed; new matter cannot be introduced.  
-        - **Scope of Amendments:** Proposed amendments are not restricted to introducing new features, specific materials, or configurations. They may include clarifications, refinements, corrections, or structural improvements that enhance the clarity and enforceability of the claim.  
-        - **Conflict Avoidance:** Amendments should not create conflicts with dependent claims. If necessary, suggest corresponding amendments to dependent claims to maintain consistency across the claim set.  
-        --- 
-      
     Format for Each Amendment:  
     Amendment [Number]: [Feature Title]  
     Original Claim Language: 
-    "[Please extract the exact full original text of foundational claim from application as Filed, ensuring that it is copied verbatim without any omissions or alterations.]"
+    "[Please include the exact full original text of the foundational claim from the Application as Filed, ensuring it is copied verbatim without any omissions, alterations, or summaries, regardless of its length.]"
     
     Proposed Amended Language:  
     "[Insert the enhanced feature description, incorporating new details, specific materials, or configurations. Only use the content from Application as Filed when proposing Amendments. **Underline** the new language proposed by enclosing it within '<u>' and '</u>' tags.]"  
     
     Derivation of Amendment:  
-    Source Reference: Carefully cite the exact sections, paragraphs, figures, or embodiments from the Application as Filed that directly support the amendment. Ensure the citations accurately correspond to the content used in the amendment. 
+    Source Reference: Describe whether any of the content in Application as filed can be inferred to Proposed Amended the new or modified language by enclosing it within `<u>` and `</u>` tags. If yes then give me paragraph number that describes it, else change the Proposed Amended.
     Source Reference: For example, "Derived from Paragraph [0032] of the application, which describes the specific configuration..." or "Supported by Figure 4, illustrating the component layout..."
-    Verification Step: Before finalizing, cross-check all source references to ensure they match the provided Application as Filed content.
     Reasoning: 
     Explain why the amendment was made, detailing how it enhances specificity, overcomes prior art, or adds technical advantages. Highlight any differences from the cited references. Emphasize any technical advantages or improvements introduced by the amendments.  
     Provide arguments supporting novelty and non-obviousness over the cited reference.
-    Emphasize any technical advantages or improvements introduced by the amendments.
-
+    Emphasize any technical advantages or improvements introduced by the amendments.   
+    
     IMPORTANT NOTE WHILE PROPOSING ARGUMENTS:
     '''\Guidance for Proposing Amendments and Arguments:
 
@@ -1325,6 +1542,12 @@ def save_analysis_to_word(analysis_output):
             parts = re.split(r"(\*\*[^*]+\*\*:?)", line[2:].strip())
             for part in parts:
                 if part.startswith("**") and part.endswith(":**"):
+                    # Bold text with colon
+                    bold_text = part[2:-3]  # Remove '**' at the start and ':**' at the end
+                    run = paragraph.add_run(bold_text)
+                    run.bold = True
+                    paragraph.add_run(":")  # Add colon after bold text
+                elif part.startswith("**") and part.endswith("**:"):
                     # Bold text with colon
                     bold_text = part[2:-3]  # Remove '**' at the start and ':**' at the end
                     run = paragraph.add_run(bold_text)
@@ -1792,6 +2015,198 @@ if st.session_state.get("conflict_results") is not None:
             else:  
                 st.warning("Please upload the referenced documents first.")  
   
+
+# from typing import List, Dict  
+# import os  
+# import re  
+# from pdfminer.high_level import extract_text  
+  
+# def extract_and_number_paragraphs_from_pdf(pdf_path: str) -> List[Dict[str, str]]:  
+#     """  
+#     Extracts paragraphs from a PDF document using pdfminer.six and assigns sequential numbers.  
+  
+#     Args:  
+#         pdf_path (str): The file path to the PDF document.  
+  
+#     Returns:  
+#         List[Dict[str, str]]: A list of dictionaries containing paragraph numbers and text.  
+#     """  
+#     if not os.path.exists(pdf_path):  
+#         raise FileNotFoundError(f"The file {pdf_path} does not exist.")  
+  
+#     # Extract text from the PDF  
+#     text = extract_text(pdf_path)  
+  
+#     # Split text into paragraphs based on two or more consecutive newlines  
+#     raw_paragraphs = re.split(r'\n{2,}', text)  
+#     numbered_paragraphs = []  
+  
+#     # Enumerate and clean paragraphs  
+#     for i, para in enumerate(raw_paragraphs):  
+#         # Clean up the paragraph text  
+#         para_text = para.strip()  
+#         if para_text:  
+#             # Replace multiple whitespace characters with a single space  
+#             para_text = re.sub(r'\s+', ' ', para_text)  
+#             numbered_paragraphs.append({  
+#                 'paragraph_number': f'Paragraph {i + 1}',  
+#                 'text': para_text  
+#             })  
+
+#     st.write(numbered_paragraphs)
+#     return numbered_paragraphs 
+
+
+
+
+#  (((((( pydantic pdfminer ))))))
+# from typing import List  
+# import os  
+# import re  
+# from pdfminer.high_level import extract_text  
+# from pydantic import BaseModel, ValidationError, validator, constr  
+  
+# # Define a Pydantic model for paragraphs  
+# class Paragraph(BaseModel):  
+#     paragraph_number: str  
+#     text: constr(min_length=1)  # type: ignore # Ensures text is at least 1 character long  
+  
+#     @validator('paragraph_number')  
+#     def validate_paragraph_number(cls, v):  
+#         if not re.match(r'^Paragraph \d+$', v):  
+#             raise ValueError('Paragraph number must be in the format "Paragraph N".')  
+#         return v  
+  
+#     @validator('text')  
+#     def validate_text(cls, v):  
+#         if not v.strip():  
+#             raise ValueError('Text cannot be empty or whitespace.')  
+#         return v.strip()  
+  
+# Function to extract and validate paragraphs from a PDF 
+# def extract_and_number_paragraphs_from_pdf(pdf_path: str) -> List[Paragraph]:  
+
+#     if not os.path.exists(pdf_path):  
+#         raise FileNotFoundError(f"The file {pdf_path} does not exist.")  
+  
+#     # Extract text from the PDF using pdfminer.six  
+#     text = extract_text(pdf_path)  
+  
+#     # Handle the case where no text could be extracted  
+#     if not text:  
+#         print("No text could be extracted from the PDF.")  
+#         return []  
+  
+#     # Split text into paragraphs based on double newlines or paragraph markers  
+#     raw_paragraphs = re.split(r'\n{2,}|\r\n{2,}|\f', text)  
+#     numbered_paragraphs = []  
+  
+#     for i, para in enumerate(raw_paragraphs):  
+#         para_text = para.strip()  
+#         if para_text:  
+#             # Replace multiple whitespace characters with a single space  
+#             para_text = re.sub(r'\s+', ' ', para_text)  
+#             try:  
+#                 paragraph = Paragraph(  
+#                     paragraph_number=f'Paragraph {i + 1}',  
+#                     text=para_text  
+#                 )  
+#                 numbered_paragraphs.append(paragraph)  
+#             except ValidationError as e:  
+#                 # Handle validation errors as needed  
+#                 print(f"Validation error at paragraph {i + 1}:\n{e}\n")  
+#                 # You can choose to continue, skip, or raise an exception  
+#                 # For this example, we'll skip invalid paragraphs  
+#                 continue  
+            
+#     st.write(numbered_paragraphs)
+#     return numbered_paragraphs  
+
+
+
+import fitz  # PyMuPDF  
+import re  
+  
+def extract_paragraphs_with_numbers(pdf_path: str):  
+    paragraphs = []  
+    document = fitz.open(pdf_path)  
+  
+    full_text = ""  
+  
+    # Accumulate text from all pages  
+    for page in document:  
+        # Extract text as a dictionary to avoid layout issues  
+        text_dict = page.get_text("dict")  
+        for block in text_dict["blocks"]:  
+            if "lines" in block:  
+                for line in block["lines"]:  
+                    for span in line["spans"]:  
+                        # Concatenate text and replace " - " with "-"  
+                        full_text += span["text"].replace(" - ", "-") + " "  
+    
+    # st.warning(full_text)  
+      
+    # Adjust the regex to match both "[0001]" and "[ 0001 ]"  
+    matches = list(re.finditer(r"\[\s*\d+\s*\]", full_text))  
+  
+    for index, match in enumerate(matches):  
+        paragraph_number = match.group(0)  # e.g., '[001]' or '[ 001 ]'  
+        start_idx = match.end()  
+  
+        # Determine end of the paragraph  
+        end_idx = matches[index + 1].start() if index + 1 < len(matches) else len(full_text)  
+  
+        paragraph_text = full_text[start_idx:end_idx].strip()  
+        paragraphs.append({'Paragraph ': paragraph_number, 'text': paragraph_text})  
+  
+    document.close()  
+    st.write(paragraphs)  
+  
+    return paragraphs  
+
+
+
+# (((((( Not works for continue Pages ))))))
+# import fitz  # PyMuPDF  
+# import re  
+# def extract_paragraphs_with_numbers(pdf_path: str):  
+#     paragraphs = []  
+#     document = fitz.open(pdf_path)  
+#     for page in document:  
+#         text = page.get_text()  
+#         # Find all paragraph numbers and their positions  
+#         matches = list(re.finditer(r"(\[\d+\])", text))  
+          
+#         for index, match in enumerate(matches):  
+#             paragraph_number = match.group(0)  # e.g., '[001]'  
+#             start_idx = match.end()  
+#             # Determine end of the paragraph  
+#             end_idx = matches[index + 1].start() if index + 1 < len(matches) else len(text)  
+#             paragraph_text = text[start_idx:end_idx].strip()  
+#             paragraphs.append({'paragraph_number': paragraph_number, 'text': paragraph_text})  
+#     document.close()  
+#     st.write(paragraphs)
+#     return paragraphs 
+
+
+
+from sklearn.feature_extraction.text import TfidfVectorizer  
+from sklearn.metrics.pairwise import cosine_similarity  
+from typing import List, Dict    
+  
+def find_supporting_paragraphs(amendment_text: str, paragraphs: List[Dict]) -> List[Dict]:  
+    texts = [para['text'] for para in paragraphs]  
+    vectorizer = TfidfVectorizer().fit_transform([amendment_text] + texts)  
+    vectors = vectorizer.toarray()  
+    cosine_matrix = cosine_similarity([vectors[0]], vectors[1:])  
+    similarity_scores = cosine_matrix[0]  
+    # Get top matching paragraphs  
+    top_indices = similarity_scores.argsort()[-3:][::-1]  # Top 3 paragraphs  
+    supporting_paras = [paragraphs[i] for i in top_indices]  
+    return supporting_paras  
+
+
+
 # Step 3: Ask if the Application is Published  
 if st.session_state.get("figure_analysis") is not None:  
     with st.expander("Step 3: Application as Filed", expanded=True):  
@@ -1842,6 +2257,7 @@ if st.session_state.get("figure_analysis") is not None:
                             st.session_state.filed_application_name = pdf_file.name  
                             # Proceed with Step 3 as the combined PDF is ready  
                             extracted_filed_app_text = extract_and_process_text_from_pdf(output_pdf_file)  
+                            
   
                             if extracted_filed_app_text:  
                                 processed_filed_app_text = "\n".join(extracted_filed_app_text)  
@@ -1906,6 +2322,8 @@ if st.session_state.get("figure_analysis") is not None:
   
                     # Validate the uploaded filed application  
                     extracted_filed_app_text = extract_and_process_text_from_pdf(temp_file_path)  
+                    processed_filed_app_text_number = extract_paragraphs_with_numbers(temp_file_path)
+                    
                     os.remove(temp_file_path)  
   
                     if extracted_filed_app_text:  
@@ -1913,7 +2331,7 @@ if st.session_state.get("figure_analysis") is not None:
                         st.session_state.filed_application_name = uploaded_filed_app.name  
   
                         filed_app_details = extract_details_from_filed_application(  
-                            processed_filed_app_text,  
+                            processed_filed_app_text_number,  
                             st.session_state.foundational_claim,  
                             st.session_state.domain,  
                             st.session_state.expertise,  
@@ -1924,7 +2342,7 @@ if st.session_state.get("figure_analysis") is not None:
                             st.session_state.filed_application_analysis = filed_app_details_json  
   
                             analysis_results = analyze_filed_application(  
-                                processed_filed_app_text,  
+                                processed_filed_app_text_number,  
                                 st.session_state.foundational_claim,  
                                 st.session_state.dependent_claim,
                                 st.session_state.figure_analysis,  
@@ -1932,6 +2350,19 @@ if st.session_state.get("figure_analysis") is not None:
                                 st.session_state.expertise,  
                                 st.session_state.style  
                             )    
+                            
+                            # analysis_results_valide = find_supporting_paragraphs(analysis_results, processed_filed_app_text_number)
+                            # st.success(analysis_results_valide)
+
+                            # Validation 
+                            # amendments = parse_amendments_output(analysis_results)  
+                            # for amendment in amendments:  
+                            #     source_content = extract_source_content(processed_filed_app_text, amendment["Source Reference"])  
+                            #     is_valid = validate_amendment_with_source(amendment["Proposed Amended Language"], source_content)  
+                            #     st.warning(f"Amendment Valid: {is_valid}")  
+                                
+                            # analysis_results_source = correct_amendment_references(analysis_results, processed_filed_app_text)
+                            # st.warning(analysis_results_source)
         
                             if analysis_results:  
                                 st.session_state.filed_application_analysis = analysis_results  
