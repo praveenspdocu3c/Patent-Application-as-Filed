@@ -2190,20 +2190,20 @@ def extract_paragraphs_with_numbers(pdf_path: str):
 
 
 
-from sklearn.feature_extraction.text import TfidfVectorizer  
-from sklearn.metrics.pairwise import cosine_similarity  
-from typing import List, Dict    
+# from sklearn.feature_extraction.text import TfidfVectorizer  
+# from sklearn.metrics.pairwise import cosine_similarity  
+# from typing import List, Dict    
   
-def find_supporting_paragraphs(amendment_text: str, paragraphs: List[Dict]) -> List[Dict]:  
-    texts = [para['text'] for para in paragraphs]  
-    vectorizer = TfidfVectorizer().fit_transform([amendment_text] + texts)  
-    vectors = vectorizer.toarray()  
-    cosine_matrix = cosine_similarity([vectors[0]], vectors[1:])  
-    similarity_scores = cosine_matrix[0]  
-    # Get top matching paragraphs  
-    top_indices = similarity_scores.argsort()[-3:][::-1]  # Top 3 paragraphs  
-    supporting_paras = [paragraphs[i] for i in top_indices]  
-    return supporting_paras  
+# def find_supporting_paragraphs(amendment_text: str, paragraphs: List[Dict]) -> List[Dict]:  
+#     texts = [para['text'] for para in paragraphs]  
+#     vectorizer = TfidfVectorizer().fit_transform([amendment_text] + texts)  
+#     vectors = vectorizer.toarray()  
+#     cosine_matrix = cosine_similarity([vectors[0]], vectors[1:])  
+#     similarity_scores = cosine_matrix[0]  
+#     # Get top matching paragraphs  
+#     top_indices = similarity_scores.argsort()[-3:][::-1]  # Top 3 paragraphs  
+#     supporting_paras = [paragraphs[i] for i in top_indices]  
+#     return supporting_paras  
 
 
 
